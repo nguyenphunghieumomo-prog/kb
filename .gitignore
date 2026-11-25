@@ -1,0 +1,6 @@
+preview.html
+__pycache__/
+inbox/_converted/
+.vs/
+*.pfx
+.env

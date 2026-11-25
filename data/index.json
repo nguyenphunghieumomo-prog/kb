@@ -1,0 +1,181 @@
+{
+ "site": {
+  "title": "Sổ tay học tập",
+  "sub": "Tài liệu cá nhân · IT & tài chính"
+ },
+ "categories": [
+  {
+   "id": "vmware",
+   "name": "VMware",
+   "desc": "ESXi, vCenter, vSAN, NSX",
+   "ic": "VM",
+   "subs": [
+    {
+     "id": "esxi",
+     "name": "ESXi"
+    },
+    {
+     "id": "vcenter",
+     "name": "vCenter"
+    },
+    {
+     "id": "vsan",
+     "name": "vSAN"
+    },
+    {
+     "id": "nsx",
+     "name": "NSX"
+    },
+    {
+     "id": "su-co",
+     "name": "Sự cố"
+    }
+   ]
+  },
+  {
+   "id": "proxmox-ceph",
+   "name": "Proxmox & Ceph",
+   "desc": "Cluster, HA, OSD, PG, Ceph",
+   "ic": "PC",
+   "subs": [
+    {
+     "id": "cluster",
+     "name": "Cluster & HA"
+    },
+    {
+     "id": "ceph",
+     "name": "Ceph, OSD & PG"
+    },
+    {
+     "id": "storage-backup",
+     "name": "Storage & Backup"
+    },
+    {
+     "id": "vm-container",
+     "name": "VM & Container"
+    },
+    {
+     "id": "mang",
+     "name": "Network & VLAN"
+    }
+   ]
+  },
+  {
+   "id": "k8s",
+   "name": "Kubernetes",
+   "desc": "RKE2, Rancher, lab 6 tháng",
+   "ic": "K8",
+   "subs": [
+    {
+     "id": "co-ban",
+     "name": "Kiến thức cơ bản"
+    },
+    {
+     "id": "rke2-rancher",
+     "name": "RKE2 & Rancher"
+    },
+    {
+     "id": "lab",
+     "name": "Lab"
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "name": "S3 & Storage",
+   "desc": "RGW, MinIO, backup, NAS",
+   "ic": "S3",
+   "subs": [
+    {
+     "id": "rgw",
+     "name": "RGW"
+    },
+    {
+     "id": "minio",
+     "name": "MinIO"
+    },
+    {
+     "id": "backup-nas",
+     "name": "Backup & NAS"
+    }
+   ]
+  },
+  {
+   "id": "devops",
+   "name": "DevOps",
+   "desc": "CI/CD, Git, tự động hóa",
+   "ic": "DO",
+   "subs": [
+    {
+     "id": "git-cicd",
+     "name": "Git & CI/CD"
+    },
+    {
+     "id": "docker",
+     "name": "Docker"
+    },
+    {
+     "id": "automation",
+     "name": "Tự động hóa"
+    }
+   ]
+  },
+  {
+   "id": "kinh-te",
+   "name": "Kinh tế & Tài chính",
+   "desc": "Kinh tế cơ bản, tài chính cá nhân",
+   "ic": "KT",
+   "subs": [
+    {
+     "id": "kinh-te-co-ban",
+     "name": "Kinh tế cơ bản"
+    },
+    {
+     "id": "tai-chinh-ca-nhan",
+     "name": "Tài chính cá nhân"
+    }
+   ]
+  },
+  {
+   "id": "tieng-anh",
+   "name": "Tiếng Anh",
+   "desc": "Từ vựng, ngữ pháp, giao tiếp",
+   "ic": "EN",
+   "subs": [
+    {
+     "id": "tu-vung",
+     "name": "Từ vựng"
+    },
+    {
+     "id": "ngu-phap",
+     "name": "Ngữ pháp"
+    },
+    {
+     "id": "giao-tiep",
+     "name": "Giao tiếp"
+    }
+   ]
+  }
+ ],
+ "posts": [
+  {
+   "id": "tao-cluster-proxmox-3-node",
+   "title": "Tạo Cluster Proxmox VE với 3 node",
+   "cat": "proxmox-ceph",
+   "sub": "cluster",
+   "type": "Quy trình",
+   "tags": [
+    "proxmox",
+    "cluster",
+    "quorum",
+    "join",
+    "vlan"
+   ],
+   "status": "approved",
+   "updated": "2026-11-25",
+   "summary": "Các bước tạo cluster 3 node PVE1/PVE2/PVE4, lấy Join Information và join node.",
+   "review_note": "",
+   "path": "docs/proxmox-ceph/cluster/tao-cluster-proxmox-3-node.md"
+  }
+ ]
+}
