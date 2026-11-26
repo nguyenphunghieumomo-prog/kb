@@ -1,3 +1,4 @@
+````instructions
 # Luật cho Copilot — Sổ tay học tập (repo công khai, GitHub Pages)
 
 Bạn là người biên tập tài liệu cho web sổ tay này. Trả lời và viết bài bằng **tiếng Việt**, giữ nguyên thuật ngữ kỹ thuật tiếng Anh, lệnh và đường dẫn. Người dùng làm hạ tầng ảo hóa/lưu trữ (VMware, Proxmox, Ceph, S3), đang tự học thêm k8s, DevOps, kinh tế, tiếng Anh.
@@ -12,18 +13,25 @@ Bạn là người biên tập tài liệu cho web sổ tay này. Trả lời v�
 ## Mục hiện có
 vmware, proxmox-ceph, k8s, s3, devops, kinh-te, tieng-anh (mục nhỏ xem `data/categories.json`).
 
-## Khi người dùng nói "Xử lý inbox"
-1. Chạy `python scripts/convert_inbox.py` nếu chưa có `_converted`. Đọc từng `raw.md` và xem ảnh đi kèm.
-2. **Phân loại**: nếu file nằm trong `inbox/<mục>/` hoặc `inbox/<mục>/<mục-nhỏ>/`, tên thư mục là gợi ý của người dùng (ưu tiên theo nó, nhưng nếu nội dung rõ ràng lệch mục thì hỏi lại). Nhiều file cùng thư mục có thể là các phần của một chủ đề: đọc hết rồi quyết định gộp hay tách bài. Nếu không có gợi ý, chọn mục → mục nhỏ phù hợp nhất. Nếu không khớp mục/mục nhỏ nào, **dừng lại hỏi** người dùng trước khi tạo mới (đề xuất tên id + tên hiển thị). Khi được đồng ý: thêm vào `data/categories.json` (mục lớn: id, name, desc, ic 2 ký tự; mục nhỏ: id, name).
-   - Nguồn là file `.md` có sẵn (ví dụ tải từ repo khác): bỏ front matter cũ, sửa đường dẫn ảnh tương đối về `assets/img/<mục>/<tên-bài>/`, chuyển các link nội bộ hỏng thành chữ thường, rồi soạn lại đúng khuôn của repo này. Một file nguồn quá dài chứa nhiều chủ đề thì đề xuất tách bài và hỏi người dùng trước khi tách.
-3. **Kiểm tra trùng chủ đề**: tìm trong `docs/` bài đã có cùng chủ đề. Nếu có, **dừng lại**, hiển thị nội dung tóm tắt của cả hai bài và hỏi: gộp vào bài cũ / tạo bài mới / hủy tài liệu. Không tự quyết.
-4. **Soạn bài** (không sao chép nguyên văn máy móc, chỉ làm gọn và rõ ràng):
-   - Một tiêu đề `#` duy nhất, các phần `##` đánh số khi là quy trình; lệnh để trong khối ``` có ghi ngôn ngữ; bảng dùng markdown.
-   - Giữ đúng số liệu, IP, tên node, tên lệnh của tài liệu gốc. Không bịa thêm thông tin; chỗ không rõ thì ghi chú `> Cần xác nhận: ...`.
-   - Ảnh: copy vào `assets/img/<mục>/<tên-bài>/`, đặt tên có nghĩa, có chú thích ngắn bên dưới.
+## Khi người dùng nói `Xử lý inbox`
+1. Chạy `python scripts/convert_inbox.py` nếu chưa có `_converted`. Sau đó đọc từng `raw.md` và xem ảnh đi kèm.
+2. **Phân loại**: tên thư mục trong `inbox/<mục>/` hoặc `inbox/<mục>/<mục-nhỏ>/` là gợi ý. Chọn mục và mục nhỏ phù hợp nhất trong cấu trúc hiện có; không hỏi nếu có thể phân loại hợp lý.
+3. **Chỉ hỏi người dùng** khi:
+   - Không tìm thấy mục/mục nhỏ phù hợp an toàn để tạo bài.
+   - Phát hiện trùng chủ đề quan trọng với bài đã có trong `docs/`.
+   - Phát hiện mật khẩu, token, private key, API key hoặc chuỗi kết nối trong nội dung hoặc ảnh cần che.
+   - File dài chứa nhiều chủ đề rõ rệt cần quyết định tách bài.
+4. **Kiểm tra trùng chủ đề**: nếu trùng bài cũ, chỉ dừng để tóm tắt cả hai và hỏi gộp vào bài cũ, tạo bài mới hay hủy tài liệu. Không tự chọn cho trường hợp này.
+5. **Soạn lại bài** (không sao chép nguyên văn máy móc):
+   - Một tiêu đề `#` duy nhất. Các phần quy trình dùng `##` đánh số.
+   - Lệnh đặt trong khối ``` có ghi ngôn ngữ; bảng dùng Markdown.
+   - Giữ đúng số liệu, IP, tên node, tên lệnh và thông tin kỹ thuật của nguồn.
+   - Không bịa thông tin. Chỗ chưa rõ ghi `> Cần xác nhận: ...`.
+   - Copy ảnh vào `assets/img/<mục>/<tên-bài>/`, đặt tên có nghĩa và thêm chú thích ngắn.
    - Cuối bài ghi `> Nguồn: <tên file gốc>`.
-5. **Front matter bắt buộc** ở đầu file:
-```
+   - Bỏ front matter cũ nếu tài liệu `.md` đã tải từ repo khác; sửa link ảnh và link nội bộ về cấu trúc của repo.
+6. **Front matter bắt buộc** ở đầu bài:
+```yaml
 ---
 title: Tên bài
 cat: <id mục>
@@ -37,25 +45,32 @@ source: <tên file gốc>
 review_note:
 ---
 ```
-   Bài mới luôn là `status: draft`. Không bao giờ tự đặt `approved`.
-6. Chuyển file gốc từ `inbox/` sang `archive/` (giữ nguyên cấu trúc thư mục con), chạy `python scripts/build_index.py`, rồi báo lại: đã tạo bài nào, vào mục nào, ảnh nào, điều gì cần xác nhận.
+7. Chuyển file gốc từ `inbox/` sang `archive/`, giữ nguyên cấu trúc thư mục con.
+8. Chạy `python scripts/build_index.py` để cập nhật index.
+9. Chạy `python scripts/plan_push.py` cho toàn bộ bài mới hoặc bài vừa thay đổi.
+10. Nếu plan không có dòng `LỖI` và không có cảnh báo bí mật/mật khẩu/token, tự commit và push bài `draft` lên `main`. Không chờ xác nhận.
+11. Nếu plan có dòng `LỖI` hoặc cảnh báo bí mật/mật khẩu/token, dừng push và báo người dùng nguyên văn cảnh báo để họ xử lý.
 
-## Duyệt và chỉnh sửa
-- Người dùng xem bản nháp ở tab "Chờ duyệt" và nhắn yêu cầu chỉnh: sửa đúng phần được nêu, cập nhật `updated`, xóa `review_note` khi đã làm xong.
-- Chỉ khi người dùng nói rõ "duyệt" mới đổi `status: approved`, sau đó chạy lại `build_index.py`.
-- Chỉ `git commit`/`git push` theo mục "Đẩy bài lên GitHub" bên dưới, sau khi người dùng xác nhận.
+## Khi tôi gõ `Duyệt <tên bài>` hoặc `Duyệt tất cả`
+- Chỉ thực hiện duyệt khi nhận đúng một trong hai lệnh này.
+- `Duyệt <tên bài>`: đổi đúng bài được chỉ định thành `status: approved`, cập nhật `updated` và chạy `python scripts/build_index.py`.
+- `Duyệt tất cả`: đổi mọi bài `draft` thành `approved`, cập nhật `updated` và chạy `python scripts/build_index.py`.
+- Sau khi duyệt, chạy `python scripts/plan_push.py` cho các bài đã duyệt.
+- Nếu plan không có dòng `LỖI` và không có cảnh báo bí mật/mật khẩu/token, commit và push lên `main` để bài hiện trong danh sách chính.
+- Không tự duyệt bài khi chỉ chạy `Xử lý inbox`.
 
-## Đẩy bài lên GitHub (khi người dùng nói "Đẩy bài <tên>" hoặc "Push bài")
-1. **Phân tích path**: chạy `python scripts/plan_push.py docs/<mục>/<mục-nhỏ>/<bài>.md` (không tham số = mọi bài đang thay đổi). Trình bày cho người dùng: mục > mục nhỏ, path trên GitHub, link web sau khi đăng, danh sách file sẽ commit (bài + ảnh), mục mới nếu có, cảnh báo.
-2. Có LỖI (path sai, front matter không khớp thư mục, thiếu ảnh) thì sửa rồi chạy lại; có cảnh báo bí mật hoặc mục mới thì hỏi người dùng. Chưa đạt thì **không đẩy**.
-3. **Chờ người dùng xác nhận** ("OK đẩy"). Không tự đẩy.
-4. `git add` đúng từng file trong danh sách (cấm `git add .` và `git add -A`), commit theo message gợi ý của script, `git pull --rebase origin main`, rồi `git push origin main`. Không `--force`.
-5. Báo lại: link commit và link web (GitHub Actions mất khoảng 1-2 phút để đăng). Lỗi xác thực hoặc xung đột thì báo nguyên văn lỗi, không tự xử lý bằng cách ép đẩy.
-6. Bài `draft` vẫn được đẩy (lưu trữ trên GitHub, hiện ở tab Chờ duyệt); bài `approved` hiện ở danh sách chính. `data/index.json` do Actions tự sinh, không commit tay.
+## Git và push
+- Không quét hoặc xử lý tự động theo lịch. Chỉ xử lý khi tôi gõ `Xử lý inbox`.
+- Không bao giờ chạy `git add` với file hoặc thư mục dưới `inbox/` hoặc `archive/`; cả hai thư mục được giữ trên máy local.
+- Chỉ `git add` bài trong `docs/`, ảnh trong `assets/`, `data/categories.json`, `data/index.json` và các file cấu hình/giao diện thực sự thay đổi.
+- `git add .` và `git add -A` là không được phép.
+- Không dùng `git push --force`, `--force-with-lease` hoặc biến thể ép push nào.
+- Khi push gặp lỗi xác thực hoặc xung đột, báo nguyên văn lỗi và dừng lại. Không tự rebase, merge hoặc chỉnh lịch sử để ép push.
 
 ## An toàn
-- Repo công khai: tài liệu kỹ thuật thì đăng được, nhưng nếu thấy **mật khẩu, token, private key, API key, chuỗi kết nối** trong nội dung hoặc ảnh, dừng lại báo người dùng, đề xuất che bằng `***` trước khi đưa vào bài.
-- Không đưa thông tin đăng nhập GitHub hay khóa truy cập vào bất kỳ file nào.
+- Repo công khai có thể chứa tài liệu kỹ thuật, nhưng mật khẩu, token, private key, API key và chuỗi kết nối phải dừng lại để đề xuất che bằng `***` trước khi đăng.
+- Không đưa thông tin đăng nhập GitHub hoặc khóa truy cập vào bất kỳ file nào.
 
 ## Giao diện (chỉ khi được yêu cầu sửa web)
 Giữ form hiện tại (header, nav, ô danh mục, tìm kiếm Ctrl+K, mục lục bài). Màu và nền theo `DESIGN.md`: nền `#050505`, bề mặt `#111`, viền `#2a2a2a`, nhấn đỏ `#e50914`, hover `#ff1e1e`; font bài viết Times New Roman. Không thêm thư viện ngoài cdnjs, không thêm build tool nặng (giữ site tĩnh thuần).
+````

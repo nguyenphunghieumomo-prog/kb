@@ -4,3 +4,9 @@ inbox/_converted/
 .vs/
 *.pfx
 .env
+
+# Giữ file gốc trên máy, không đưa inbox/archive lên GitHub
+inbox/*
+!inbox/.gitkeep
+archive/*
+!archive/.gitkeep

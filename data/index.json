@@ -57,6 +57,10 @@
     {
      "id": "mang",
      "name": "Network & VLAN"
+    },
+    {
+     "id": "tai-lieu-nguoi-moi",
+     "name": "Tai Lieu Nguoi Moi"
     }
    ]
   },
@@ -159,6 +163,26 @@
  ],
  "posts": [
   {
+   "id": "lenh-he-thong-va-node-proxmox",
+   "title": "Lệnh quản trị hệ thống và node Proxmox",
+   "cat": "proxmox-ceph",
+   "sub": "cluster",
+   "type": "Lệnh",
+   "tags": [
+    "proxmox",
+    "system",
+    "node",
+    "kernel",
+    "upgrade",
+    "certificate"
+   ],
+   "status": "draft",
+   "updated": "2026-11-25",
+   "summary": "Nhóm lệnh kiểm tra hệ thống, node, dịch vụ, chứng chỉ, thời gian, boot và nâng cấp Proxmox VE.",
+   "review_note": "",
+   "path": "docs/proxmox-ceph/cluster/lenh-he-thong-va-node-proxmox.md"
+  },
+  {
    "id": "tao-cluster-proxmox-3-node",
    "title": "Tạo Cluster Proxmox VE với 3 node",
    "cat": "proxmox-ceph",
@@ -176,6 +200,45 @@
    "summary": "Các bước tạo cluster 3 node PVE1/PVE2/PVE4, lấy Join Information và join node.",
    "review_note": "",
    "path": "docs/proxmox-ceph/cluster/tao-cluster-proxmox-3-node.md"
+  },
+  {
+   "id": "xoa-node-loi-khoi-cluster",
+   "title": "Xóa node lỗi khỏi cluster Proxmox",
+   "cat": "proxmox-ceph",
+   "sub": "cluster",
+   "type": "Sự cố",
+   "tags": [
+    "proxmox",
+    "cluster",
+    "quorum",
+    "corosync",
+    "pvecm"
+   ],
+   "status": "draft",
+   "updated": "2026-11-25",
+   "summary": "Cách kiểm tra quorum và xóa node đang lỗi khỏi cluster bằng pvecm delnode.",
+   "review_note": "",
+   "path": "docs/proxmox-ceph/cluster/xoa-node-loi-khoi-cluster.md"
+  },
+  {
+   "id": "gioi-thieu-cai-dat-proxmox",
+   "title": "Giới thiệu và cài đặt Proxmox VE cho người mới",
+   "cat": "proxmox-ceph",
+   "sub": "tai-lieu-nguoi-moi",
+   "type": "Quy trình",
+   "tags": [
+    "proxmox",
+    "beginner",
+    "system requirements",
+    "iso",
+    "installation",
+    "gui"
+   ],
+   "status": "draft",
+   "updated": "2026-11-25",
+   "summary": "Yêu cầu phần cứng, quy trình cài đặt Proxmox VE bằng ISO và các khu vực chính của giao diện quản trị.",
+   "review_note": "",
+   "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/gioi-thieu-cai-dat-proxmox.md"
   }
  ]
 }
