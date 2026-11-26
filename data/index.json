@@ -221,6 +221,65 @@
    "path": "docs/proxmox-ceph/cluster/xoa-node-loi-khoi-cluster.md"
   },
   {
+   "id": "cau-hinh-linux-bridge-va-ovs-bridge",
+   "title": "Cấu hình Linux Bridge và OVS Bridge trên Proxmox",
+   "cat": "proxmox-ceph",
+   "sub": "tai-lieu-nguoi-moi",
+   "type": "Quy trình",
+   "tags": [
+    "proxmox",
+    "linux bridge",
+    "ovs",
+    "vmbr0",
+    "networking"
+   ],
+   "status": "draft",
+   "updated": "2026-11-26",
+   "summary": "Cấu hình Linux Bridge và Open vSwitch Bridge, kèm ưu nhược điểm và mô hình VLAN/Trunk.",
+   "review_note": "",
+   "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/cau-hinh-linux-bridge-va-ovs-bridge.md"
+  },
+  {
+   "id": "cau-hinh-network-interface-bonding",
+   "title": "Cấu hình Network Interface và Bonding trên Proxmox",
+   "cat": "proxmox-ceph",
+   "sub": "tai-lieu-nguoi-moi",
+   "type": "Quy trình",
+   "tags": [
+    "proxmox",
+    "network",
+    "nic",
+    "bonding",
+    "lacp",
+    "ovs"
+   ],
+   "status": "draft",
+   "updated": "2026-11-26",
+   "summary": "Cấu hình NIC, Linux Bonding và OVS Bonding cùng các mode và yêu cầu switch vật lý.",
+   "review_note": "",
+   "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/cau-hinh-network-interface-bonding.md"
+  },
+  {
+   "id": "cau-hinh-vlan-tren-linux-bridge-va-ovs",
+   "title": "Cấu hình VLAN trên Linux Bridge và OVS",
+   "cat": "proxmox-ceph",
+   "sub": "tai-lieu-nguoi-moi",
+   "type": "Quy trình",
+   "tags": [
+    "proxmox",
+    "vlan",
+    "linux bridge",
+    "ovs",
+    "trunk",
+    "bond"
+   ],
+   "status": "draft",
+   "updated": "2026-11-26",
+   "summary": "Cách cấu hình VLAN bằng sub-interface trên Linux Bridge và OVSIntPort trên Open vSwitch.",
+   "review_note": "",
+   "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/cau-hinh-vlan-tren-linux-bridge-va-ovs.md"
+  },
+  {
    "id": "gioi-thieu-cai-dat-proxmox",
    "title": "Giới thiệu và cài đặt Proxmox VE cho người mới",
    "cat": "proxmox-ceph",
@@ -239,6 +298,27 @@
    "summary": "Yêu cầu phần cứng, quy trình cài đặt Proxmox VE bằng ISO và các khu vực chính của giao diện quản trị.",
    "review_note": "",
    "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/gioi-thieu-cai-dat-proxmox.md"
+  },
+  {
+   "id": "sdn-simple-zone-nat-dhcp",
+   "title": "Triển khai SDN Simple Zone với DHCP và NAT",
+   "cat": "proxmox-ceph",
+   "sub": "tai-lieu-nguoi-moi",
+   "type": "Quy trình",
+   "tags": [
+    "proxmox",
+    "sdn",
+    "simple zone",
+    "dhcp",
+    "dnsmasq",
+    "nat",
+    "snat"
+   ],
+   "status": "draft",
+   "updated": "2026-11-26",
+   "summary": "Hướng dẫn tạo Simple Zone, VNet, subnet DHCP, SNAT và firewall rule cho VM/CT.",
+   "review_note": "",
+   "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/sdn-simple-zone-nat-dhcp.md"
   }
  ]
 }
