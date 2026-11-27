@@ -13,17 +13,13 @@ review_note:
 
 # Cấu hình VLAN trên Linux Bridge và OVS
 
-VLAN trên Linux Bridge thường được chia tách bằng sub-interface; OVS có thể quản lý nhiều VLAN trên một bridge nhờ OVS Internal Port và VLAN tag.
+Trong bài viết này ta sẽ làm rõ về cách cấu hình vlan trên Proxmox.
 
-## 1. VLAN trên Linux Bridge
+## 4. Cấu hình VLAN
 
-Linux Bridge truyền thống tạo sub-interface theo định dạng:
+## 4.1 VLAN trên Linux Bridge — dùng sub-interface
 
-```text
-<tên-giao-diện>.<VLAN_ID>
-```
-
-Ví dụ cấu hình Bond VLAN 70:
+Cơ chế xử lý VLAN của Linux Bridge truyền thống là bóc tách luồng dữ liệu bằng cách tạo ra các giao diện con (Sub-interface) dựa trên card vật lý hoặc cổng gộp Bond. Tên của sub-interface bắt buộc phải tuân theo định dạng: <tên_giao_diện>.<VLAN_ID>. Sau đó, ta gắn chính sub-interface đã lọc VLAN này vào Linux Bridge.
 
 ```bash
 auto bond0.70
@@ -39,18 +35,21 @@ iface vmbr0 inet static
         bridge-fd 0
 ```
 
-- `vlan-raw-device bond0`: xác định Bond làm giao diện vật lý của VLAN.
-- `bridge-ports bond0.70`: gắn sub-interface đã lọc VLAN vào bridge.
-- Switch vật lý kết nối đến Bond phải cấu hình Trunk/Tagged VLAN 70.
-
-## 2. Trunk nhiều VLAN trên Linux Bridge
+Trunk nhiều VLAN kiểu tổng quát (đặt tên NIC/VLAN theo thực tế):
 
 ```bash
+auto enpxxxs0fxnpx
+iface enpxxxs0fxnpx inet manual
+
+auto enpxxxs0fxnpx
+iface enpxxxs0fxnpx inet manual
+
 auto bond0
 iface bond0 inet manual
         bond-slaves enpxxxs0fxnpx enpxxxs0fxnpx
         bond_miimon 100
         bond-mode 802.3ad
+        bond-primary enpxxxs0fxnpx
         mtu 9000
 
 auto bond0.<Vlan_tag>
@@ -66,22 +65,32 @@ iface vmbr0 inet static
         mtu 9000
 ```
 
-Khi dùng `802.3ad`, switch vật lý phải cấu hình LACP đối ứng.
+Chú ý: cấu hình này bond đang dùng mode 802.3ad tức LACP tức switch vật lý phải cấu hình thêm phần LACP
 
-> Giới hạn của mô hình này: mỗi bridge thường chỉ phục vụ một VLAN. Khi cần nhiều VLAN cho VM, phải tạo thêm các cặp `bond0.<VLAN_ID>` và `vmbrX` tương ứng.
+Ở mô hình truyền thống này, mỗi một Switch ảo (vmbrX) chỉ phục vụ cho duy nhất 1 VLAN (với các gói tin đi ra/vào đã bóc sẵn tag). Nếu hệ thống yêu cầu cấp nhiều VLAN khác nhau cho các máy ảo (VM), ta bắt buộc phải tạo thêm nhiều cặp tương ứng: bond0.<VLAN_ID_mới> kết hợp với một Bridge mới (vmbr1, vmbr2,...).
 
-## 3. VLAN trên OVS Bridge
+## 4.2. VLAN trên OVS Bridge — Dùng OVSIntPort với tag
 
-Trong mô hình OVS, một bridge chính có thể phục vụ nhiều phân đoạn mạng thông qua `OVSIntPort`:
+Mô hình Open vSwitch (OVS) xử lý VLAN gọn gàng và tối ưu hơn nhiều so với Linux Bridge: Toàn bộ hệ thống chỉ cần duy nhất 1 giao diện Bridge chính (vmbr0). Mỗi phân đoạn mạng (VLAN) sẽ được quản lý độc lập bằng một cổng nội bộ ảo (OVSIntPort) định danh bằng tùy chọn tag=<VLAN_ID> ghim trực tiếp vào Bridge đó.
+
+- Thường nếu chúng ta sử dụng 1 host Proxmox để chạy dịch vụ thì hầu như chỉ cần 2 vlan là đủ chạy 1 Vlan cho MGT và 1 vlan cho dịch vụ mình chạy
+- Nếu cụm chúng ta là 1 cluster > 3 thì lúc đó OVS sẽ phát huy điểm mạnh của nó, giúp ta quy hoạch các vlan rất hữu ích chỉ trên 1 card vmbrx
+
+VD: vêd cấu hình Vlan trên OVS:
 
 ```bash
+# 1. Cấu hình Mạng quản trị (Management Network)
+
 auto vlan_MGT
 iface vlan_MGT inet static
         address 192.168.xx.xx/24
-        gateway 192.168.xx.x
+        gateway 192.168.xx.x               # Lưu ý: Chỉ đặt DUY NHẤT 1 gateway tại mạng MGT
         ovs_type OVSIntPort
         ovs_bridge vmbr0
         ovs_options tag=VLAN_MGT_ID
+#MGT — Mạng quản lý/quản trị host
+
+# 2. Cấu hình vlan cho dịch vụ chạy web, mail, …
 
 auto vlan_web
 iface vlan_web inet static
@@ -90,52 +99,48 @@ iface vlan_web inet static
         ovs_bridge vmbr0
         ovs_options tag=VLAN_WEB_ID
 ```
-
-- Chỉ đặt gateway trên mạng quản trị MGT.
-- `ovs_type OVSIntPort`: port nội bộ của OVS Bridge.
-- `ovs_bridge`: bridge sở hữu port.
-- `ovs_options tag=<VLAN_ID>`: gắn VLAN tag cho port.
-
-## 4. Cấu hình OVS Bridge tổng
+…. Add thêm Vlan theo nhu cầu sử dụng
 
 ```bash
+# 3. Giao diện OVS Bridge tổng quản lý tập trung
+
 auto vmbr0
 iface vmbr0 inet manual
         ovs_type OVSBridge
         ovs_ports bond0 vlan_MGT vlan_CLS vlan_WEB
+```
+
+Tổng quát ta có
+
+```bash
+auto lo
+iface lo inet loopback
+
+auto ens1xx
+iface ens1xx inet manual
+
+auto ens2xx
+iface enp2xx inet manual
+
+auto ten_vlan
+iface ten_vlan inet static
+        address 192.168.x.x/24
+        gateway 192.168.x.x
+        ovs_type OVSIntPort
+        ovs_bridge vmbr0
+        ovs_options tag=vlan_id
 
 auto bond0
 iface bond0 inet manual
         ovs_bonds ens1xx ens2xx
         ovs_type OVSBond
         ovs_bridge vmbr0
-        ovs_options bond_mode=active-backup
+        ovs_options bond_mode -> chọn mode theo nhu cầu
+
+auto vmbr0
+iface vmbr0 inet manual
+        ovs_type OVSBridge
+        ovs_ports bond0 vlan70
 ```
-
-Trên switch vật lý, port nối với Bond phải được cấu hình Trunk để cho phép các VLAN cần sử dụng.
-
-## 5. Khi nào dùng OVS cho VLAN
-
-- Một host đơn lẻ thường chỉ cần hai VLAN: quản trị và dịch vụ.
-- Cluster lớn có nhiều VLAN MGT, CLS, CEPH và migration thì OVS giúp quy hoạch tập trung trên một bridge.
-- Linux Bridge dễ hiểu và phù hợp vài VLAN nhưng cấu hình sẽ dài và rối khi số VLAN tăng nhiều.
-
-## 6. Hình minh họa từ tài liệu
-
-![VLAN Linux Bridge - trang 1](assets/img/proxmox-ceph/cau-hinh-vlan-tren-linux-bridge-va-ovs/page-1.png)
-
-*Hình 1: Sub-interface VLAN trên Linux Bridge và cấu hình Bond VLAN.*
-
-![Trunk nhiều VLAN - trang 2](assets/img/proxmox-ceph/cau-hinh-vlan-tren-linux-bridge-va-ovs/page-2.png)
-
-*Hình 2: Cấu hình Trunk nhiều VLAN bằng Bond và nhiều bridge.*
-
-![VLAN trên OVS - trang 3](assets/img/proxmox-ceph/cau-hinh-vlan-tren-linux-bridge-va-ovs/page-3.png)
-
-*Hình 3: OVSIntPort, VLAN tag và mô hình mạng quản trị/dịch vụ.*
-
-![Cấu hình OVS Bridge tổng - trang 4](assets/img/proxmox-ceph/cau-hinh-vlan-tren-linux-bridge-va-ovs/page-4.png)
-
-*Hình 4: Cấu hình tổng bond0 và vmbr0 cho nhiều VLAN.*
 
 > Nguồn: Cấu hình VLAN.pdf

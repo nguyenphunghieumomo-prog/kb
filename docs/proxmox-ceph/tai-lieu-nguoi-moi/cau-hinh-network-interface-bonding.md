@@ -13,11 +13,11 @@ review_note:
 
 # Cấu hình Network Interface và Bonding trên Proxmox
 
-Bonding gộp nhiều card mạng vật lý thành một interface logic để tăng khả năng chịu lỗi và, tùy mode, tăng băng thông.
+Trong bài viết này ta sẽ xem cách cấu hình network trên Proxmox
 
-## 1. Cấu hình Network Interface
+## 1. Cấu hình Interfaces
 
-Ví dụ khai báo hai NIC vật lý:
+Mẫu cấu hình sẽ như sau:
 
 ```bash
 auto lo
@@ -30,19 +30,24 @@ auto enp24s0f1np1
 iface enp24s0f1np1 inet manual
 ```
 
-- `auto <interface>`: khởi động interface cùng hệ thống.
-- `inet manual`: interface chỉ tồn tại và không gán IP trực tiếp.
-- Tên NIC do udev đặt theo tên hãng, loại card và slot.
+Giải thích:
 
-Luôn kiểm tra tên NIC bằng:
+`auto <tên_iface>`: interface sẽ tự khởi động cùng hệ thống.
 
-```bash
-ip a
-```
+`iface <tên_iface> inet manual`: khai báo interface tồn tại nhưng không gán IP trực tiếp — vì NIC này sẽ được đưa vào bond/bridge phía sau, không dùng độc lập.
 
-## 2. Linux Bonding
+Tên NIC (`enp24s0f0np0`, `ens3f0np0`, `eno1np0`...) là do udev đặt theo tên hãng/slot, mỗi máy có thể khác nhau — luôn kiểm tra bằng lệnh `ip a` trước khi cấu hình.
 
-Ví dụ Linux Bond dùng chế độ `active-backup`:
+## 2. Cấu hình Bonding (gộp nhiều NIC)
+
+Mục đích: gộp 2 (hoặc nhiều) card mạng vật lý thành 1 interface logic (`bond0`) để:
+
+- Tăng khả năng chịu lỗi (1 dây đứt/switch die vẫn chạy).
+- Tăng băng thông (tùy mode).
+
+## 2.1. Linux Bonding (khi ta dùng cấu hình theo kiểu linux bridge)
+
+Cấu hình sẽ như này:
 
 ```bash
 auto bond0
@@ -52,27 +57,27 @@ iface bond0 inet manual
         bond-mode active-backup
 ```
 
-- `bond_slaves`: danh sách NIC tham gia bond.
-- `bond_miimon 100`: kiểm tra link mỗi 100 ms.
-- `bond-mode active-backup`: một NIC hoạt động, NIC còn lại dự phòng.
+Giải thích:
 
-Khi không dùng chế độ động, thường không cần cấu hình Port-Channel hay LACP trên switch.
+`bond_slaves`: danh sách NIC vật lý tham gia bond.
 
-## 3. Các mode Bond thường dùng
+`bond_miimon 100`: kiểm tra trạng thái link mỗi 100ms để phát hiện đứt cáp/failover.
 
-| Mode | Cơ chế | Yêu cầu Switch |
+`bond-mode active-backup`: 1 NIC active, 1 NIC dự phòng — switch vật lý không cần cấu hình port-channel/LACP phía switch.
+
+| Mode                    | Cơ chế hoạt động                         | Yêu cầu phía Switch vật lý |
 |---|---|---|
-| `balance-rr` | Luân phiên gửi gói theo từng NIC | Static Link Aggregation / EtherChannel |
-| `active-backup` | Chỉ một NIC active, NIC khác standby | Không yêu cầu thêm cấu hình |
-| `balance-xor` | Cân bằng theo hash MAC hoặc IP | Static Link Aggregation |
-| `broadcast` | Gửi song song trên mọi NIC thành viên | Switch hỗ trợ nhận gói trùng lặp |
-| `802.3ad` | Gộp động theo giao thức LACP | Bật LACP trên switch |
-| `balance-tlb` | Cân bằng luồng gửi đi | Không yêu cầu cấu hình switch |
-| `balance-alb` | Cân bằng cả gửi và nhận qua ARP negotiation | Không yêu cầu LACP |
+| balance-rr (Round-Robin) | Truyền các gói tin theo thứ tự tuần tự từ card đầu tiên đến card cuối cùng. Giúp gộp băng thông tối đa cho cả 1 kết nối đơn lẻ. | Bắt buộc cấu hình gộp cổng tĩnh (Static Link Aggregation / EtherChannel) trên Switch. |
+| active-backup (Dự phòng) | Chỉ có 1 card active chạy,  các card khác standby. Khi card chính đứt kết nối, card phụ lập tức lên thay. | Không yêu cầu cấu hình gì trên Switch vật lý. |
+| balance-xor | Cân bằng tải luồng ra dựa trên thuật toán hăm (Hash policy) của địa chỉ MAC hoặc IP nguồn/đích. Các gói tin đi đến cùng một đích sẽ luôn đi cố định trên một card. | Bắt buộc cấu hình gộp cổng tĩnh (Static Link Aggregation / EtherChannel) trên Switch. |
+| broadcast | Truyền đồng thời tất cả gói tin ra toàn bộ các card mạng thành viên. | Bắt buộc cấu hình trên Switch hỗ trợ nhận gói tin trùng lặp. |
+| LACP (802.3ad) | Chế độ gộp cổng động tiêu chuẩn quốc tế. Sử dụng giao thức LACP để tự động bắt tay, gom băng thông và kiểm tra lỗi link giữa Server và Switch. | Bắt buộc cấu hình LACP (Dynamic Link Aggregation / Dynamic Port-Channel) trên Switch. |
+| balance-tlb (Transmit LB) | Chỉ cân bằng tải luồng dữ liệu đi ra (gửi đi) dựa trên tải của từng card mạng. Luồng dữ liệu đi vào (nhận về) vẫn chỉ đi qua 1 card mạng duy nhất. | Không yêu cầu cấu hình gì trên Switch vật lý. |
+| balance-alb (Adaptive LB) | Cân bằng tải toàn diện cho cả luồng dữ liệu đi ra và đi vào. Sử dụng cơ chế bóc tách và thay đổi gói tin ARP (ARP negotiation) để điều phối luồng nhận. | Không yêu cầu cấu hình gì trên Switch vật lý. |
 
-## 4. OVS Bonding
+## 2.2. OVS Bonding (khi ta dùng cấu hình theo kiểu OVS Bridge)
 
-Ví dụ Bond trong kiến trúc OVS:
+Cấu hinh:
 
 ```bash
 auto bond0
@@ -83,49 +88,117 @@ iface bond0 inet manual
         ovs_options bond_mode=active-backup
 ```
 
-- `ovs_bonds`: danh sách NIC vật lý.
-- `ovs_type OVSBond`: khai báo Bond của Open vSwitch.
-- `ovs_bridge vmbr0`: gắn Bond trực tiếp vào OVS Bridge.
-- `bond_mode=active-backup`: chỉ một NIC truyền nhận tại một thời điểm.
+Giải thích:
 
-Có thể cấu hình thêm VLAN cho port OVS bằng `ovs_options tag=<VLAN_ID>`.
+‘ovs_bonds ens3f1np1 ens3f0np0’: Danh sách các card mạng (NIC) vật lý tham gia vào nhóm gộp cổng (Bonding) thuộc kiến trúc Open vSwitch (OVS).
 
-## 5. Các mode Bond trên OVS
+‘ovs_type OVSBond’: Định nghĩa loại giao diện ảo này là một Bond của Open vSwitch, giúp hệ thống phân biệt với cấu hình Linux Bond truyền thống.
 
-| Mode | Cơ chế | Yêu cầu Switch |
+‘ovs_bridge vmbr0’: Chỉ định rõ ràng cổng Bond này sẽ được ghim (gắn) trực tiếp vào Switch ảo nào (ở đây là OVS Bridge vmbr0). Trong cấu hình OVS, việc gán trực tiếp như thế này giúp luồng dữ liệu được quản lý tập trung và chuẩn xác hơn.
+
+‘ovs_options bond_mode=active-backup’: Cấu hình chế độ chạy cho Bond. Ở chế độ active-backup, tại một thời điểm chỉ có 1 card mạng thực hiện truyền nhận dữ liệu (Active), card còn lại sẽ ở trạng thái chờ (Backup). Nếu card active gặp sự cố (đứt cáp, sập nguồn), card backup sẽ ngay lập tức chuyển sang active để duy trì kết nối. Giống như Linux Bond, chế độ này không yêu cầu thiết bị switch vật lý phía trên phải cấu hình Port-Channel hay LACP.
+
+Ngoài options trên OVS có khá nhiều tùy chọn để ta setup như:
+
+Cấu hình Cổng Access: `ovs_options tag=10` → Mọi gói tin đi vào cổng này nếu chưa có tag sẽ được OVS tự động gắn thẻ (tag) 10, và khi đi ra ngoài sẽ được bóc tag (untagged) để trả về dữ liệu thô cho thiết bị/máy ảo.
+
+Hoặc còn có thể cấu hình trunk, native Vlan …
+
+Một số mode cấu hình bond trên OVS
+
+| Mode | Cơ chế hoạt động | Yêu cầu phía Switch vật lý |
 |---|---|---|
-| `active-backup` | Một NIC active, tự failover sang NIC dự phòng | Không yêu cầu cấu hình thêm |
-| `balance-slb` | Cân bằng luồng gửi theo địa chỉ MAC của VM | Không yêu cầu LACP |
-| `LACP (balance-slb)` | Balance-SLB kết hợp giám sát LACP | Bật LACP trên switch |
-| `LACP (balance-tcp)` | Cân bằng theo kết nối TCP/UDP chi tiết | Bật LACP trên switch |
+| active-backup | Chỉ có 1 card chạy thực tế, các card còn lại ở trạng thái chờ. Tự động chuyển đổi (Failover) ngay lập tức khi card chính đứt cáp. | Không yêu cầu cấu hình gì trên Switch vật lý. |
+| balance-slb | Cân bằng tải luồng dữ liệu đi ra dựa trên địa chỉ MAC nguồn của máy ảo (VM). Switch chỉ cần chung mạng và bật tính năng tự học địa chỉ MAC (MAC learning). | Không yêu cầu cấu hình LACP. Mỗi VM được phân bổ đi theo một card riêng để tối ưu tổng băng thông. |
+| LACP (balance-slb) | Giống cơ chế cân bằng tải theo MAC nguồn của balance-slb. Có thêm giao thức LACP chủ động giám sát trạng thái bắt tay giữa Host và Switch. | Bắt buộc bật LACP (Link Aggregation / Dynamic Port-Channel) trên các cổng tương ứng của Switch. |
+| LACP (balance-tcp) | Chế độ cân bằng tải mạnh nhất. Bóc tách luồng dữ liệu chi tiết theo từng kết nối TCP/UDP (IP/Port nguồn-đích). Một VM chạy nhiều kết nối có thể tận dụng băng thông của cả 2 card cùng lúc. | Bắt buộc bật LACP (Link Aggregation / Dynamic Port-Channel) trên Switch vật lý. |
 
-## 6. Lựa chọn Bridge và Bond
+Đánh giá:
 
-- Linux Bridge: thích hợp mô hình đơn giản, ít VLAN và cấu hình ngắn gọn.
-- OVS: linh hoạt khi quản lý VLAN, Trunk, Access và nhiều mạng logic.
-- Với `active-backup`, không bắt buộc Port-Channel/LACP trên switch.
-- Với `802.3ad`, `balance-xor` hoặc `balance-rr`, kiểm tra cấu hình Link Aggregation trên cả switch và host.
+Linux Bridge: Khi bạn muốn chia VLAN, bạn phải tạo từng giao diện ảo riêng lẻ hoặc bật tính năng vlan-aware rồi gõ số VLAN vào phần cứng của VM. Cấu hình file text sẽ bị dài và rối nếu hệ thống có hàng trăm VLAN.
 
-## 7. Hình minh họa từ tài liệu
+OVS: Nó quản lý VLAN theo kiến trúc của một Switch vật lý thực thụ (Cisco/HP...). Bạn có thể cấu hình một Port của OVS đóng vai trò là Trunk, Access, hoặc Native VLAN rất dễ dàng và tường minh thông qua các tùy chọn (ovs_options).
 
-![Network Interface và Linux Bonding - trang 1](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-1.png)
+> Nguồn: Cấu hình Network Interface, Bonding.pdf
 
-*Hình 1: Cấu hình Interface và Bonding Linux.*
+balance-rr   card đầu tiên đến card cuối cùng.                Bắt buộc cấu hình gộp cổng tĩnh
+(Round-                                                       (Static Link Aggregation /
+Robin)       • Giúp gộp băng thông tối đa cho cả 1 kết        EtherChannel) trên Switch.
+             nối đơn lẻ.
 
-![Các mode Linux Bonding - trang 2](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-2.png)
+             • Chỉ có 1 card active chạy, các card khác
+active-
+             standby.
+backup                                                        Không yêu cầu cấu hình gì trên
+(Dự                                                           Switch vật lý.
+             • Khi card chính đứt kết nối, card phụ lập tức
+phòng)
+             lên thay.
 
-*Hình 2: Các mode balance-rr, active-backup, balance-xor và broadcast.*
+             • Cân bằng tải luồng ra dựa trên thuật toán
+balance-     hăm (Hash policy) của địa chỉ MAC hoặc IP        Bắt buộc cấu hình gộp cổng tĩnh
+xor                                                           nguồn/đích.  (Static Link Aggregation /
+                                                              EtherChannel) trên Switch.
+             • Các gói tin đi đến cùng một đích sẽ luôn đi
+             cố định trên một card.
 
-![Các mode LACP và balance mode - trang 3](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-3.png)
+             • Truyền đồng thời tất cả gói tin ra toàn bộ     Bắt buộc cấu hình trên Switch hỗ trợ
+broadcast
+             các card mạng thành viên.                        nhận gói tin trùng lặp.
 
-*Hình 3: Cấu hình 802.3ad, balance-tlb và balance-alb.*
+              • Chế độ gộp cổng động tiêu chuẩn quốc tế.
+ LACP                                                       Bắt buộc cấu hình LACP (Dynamic
+              • Sử dụng giao thức LACP để tự động bắt       Link Aggregation / Dynamic Port-
+ (802.3ad)
+              tay, gom băng thông và kiểm tra lỗi link      Channel) trên Switch.
+              giữa Server và Switch.
 
-![OVS Bonding - trang 4](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-4.png)
+              • Chỉ cân bằng tải luồng dữ liệu đi ra (gửi
+ balance-
+              đi) dựa trên tải của từng card mạng.
+ tlb                                                        Không yêu cầu cấu hình gì trên
+ (Transmit                                                  Switch vật lý.
+ LB)          • Luồng dữ liệu đi vào (nhận về) vẫn chỉ đi
+              qua 1 card mạng duy nhất.
 
-*Hình 4: Cấu hình OVSBond, ovs_bonds và bond_mode.*
+              • Cân bằng tải toàn diện cho cả luồng dữ
+ balance-     liệu đi ra và đi vào.
+ alb                                                        Không yêu cầu cấu hình gì trên
+ (Adaptive    • Sử dụng cơ chế bóc tách và thay đổi gói     Switch vật lý.
+ LB)          tin ARP (ARP negotiation) để điều phối
+              luồng nhận.
 
-![OVS Bond mode - trang 5](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-5.png)
+  Mode                Cơ chế hoạt động                          Yêu cầu phía Switch vật lý
 
-*Hình 5: Các mode OVS và so sánh Linux Bridge/OVS.*
+            • Chỉ có 1 card chạy thực tế, các card
+            còn lại ở trạng thái chờ
+ active-
+ backup                                              Không yêu cầu cấu hình gì trên Switch vật lý.
+            • Tự động chuyển đổi (Failover) ngay
+            lập tức khi card chính đứt cáp
+
+             • Cân bằng tải luồng dữ liệu đi ra dựa
+             trên địa chỉ MAC nguồn của máy ảo        Không yêu cầu cấu hình LACP.
+ balance-    (VM).
+ slb                                                  • Switch chỉ cần chung mạng và bật tính năng
+             • Mỗi VM được phân bổ đi theo một        tự học địa chỉ MAC (MAC learning).
+             card riêng để tối ưu tổng băng thông.
+
+             • Giống cơ chế cân bằng tải theo MAC
+             nguồn của balance-slb.                   Bắt buộc bật LACP (Link Aggregation /
+ LACP
+ (balance-                                            Dynamic Port-Channel) trên các cổng tương
+             • Có thêm giao thức LACP chủ động
+ slb)                                                 ứng của Switch.
+             giám sát trạng thái bắt tay giữa Host
+             và Switch.
+
+             • Chế độ cân bằng tải mạnh nhất.
+
+             • Bóc tách luồng dữ liệu chi tiết theo
+ LACP        từng kết nối TCP/UDP (IP/Port nguồn-
+                                                      Bắt buộc bật LACP (Link Aggregation /
+ (balance-   đích).
+ tcp)                                                 Dynamic Port-Channel) trên Switch vật lý.
 
 > Nguồn: Cấu hình Network Interface, Bonding.pdf

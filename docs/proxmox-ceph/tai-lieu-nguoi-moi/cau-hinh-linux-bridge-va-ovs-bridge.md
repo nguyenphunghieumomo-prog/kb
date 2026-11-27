@@ -13,13 +13,11 @@ review_note:
 
 # Cấu hình Linux Bridge và OVS Bridge trên Proxmox
 
-Linux Bridge và Open vSwitch (OVS) đều tạo Switch ảo để kết nối máy chủ, VM và Container với mạng vật lý. Linux Bridge phù hợp mô hình đơn giản; OVS phù hợp hơn khi cần quản lý nhiều VLAN hoặc quy hoạch mạng phức tạp.
+Trong bài viết này ta sẽ xem cấu hình của Linux bridge và OVS bridge như nào
 
-## 1. Linux Bridge
+## 3.1. Linux bridge
 
-### 1.1. Access VLAN
-
-Ví dụ cấu hình Linux Bridge `vmbr0` với cổng vật lý `ens18`:
+Thứ nhất, cấu hình linux-bridge mode access, đây là cấu hình default khi ta cài đặt OS (switch vật lý cấu hình mode access)
 
 ```bash
 auto vmbr0
@@ -31,17 +29,25 @@ iface vmbr0 inet static
         bridge-fd 0
 ```
 
-- `auto vmbr0`: khởi động bridge cùng hệ thống.
-- `bridge-ports ens18`: gắn NIC vật lý vào bridge.
-- `address`: đặt IP quản trị trực tiếp trên bridge.
-- `bridge-stp off`: tắt STP khi không cần; có thể cần kích hoạt lại theo thiết kế mạng.
-- `bridge-fd 0`: bridge không chờ forwarding delay của STP.
+‘auto vmbr0 (Virtual Bridge 0)’: đây là Switch ảo chính được tạo ra.
 
-Nếu cổng Switch vật lý nối với `ens18` được đặt Access VLAN 10, các VM và VM port gắn vào `vmbr0` sẽ hoạt động trong VLAN 10.
+‘bridge-ports ens18’: Dòng này cực kỳ quan trọng, nó thực hiện "gắn" (bridge) card vật lý ens18 vào Switch ảo vmbr0. Tất cả lưu lượng dữ liệu đi qua vmbr0 sẽ đi ra ngoài môi trường vật lý thông qua card ens18.
 
-### 1.2. Linux Bridge qua Bond và VLAN
+‘address 192.168.70.109/24’: IP quản trị của chính host Proxmox được gán trực tiếp vào Switch ảo này.
 
-Khi Switch vật lý dùng Trunk cho VLAN 70:
+`bridge-stp off`: tắt Spanning Tree Protocol (thường tắt vì đã có bonding lo việc failover, STP có thể gây delay convergence không cần thiết).
+
+`bridge-fd 0`: forwarding delay = 0 (bridge lên nhanh, không delay 15s theo mặc định STP).
+
+Ví dụ: Nếu cổng Switch vật lý nối với ens18 được cấu hình là Access VLAN 10, thì toàn bộ các máy ảo kết nối vào vmbr0 trên host Proxmox mặc nhiên sẽ nhận IP và hoạt động trong VLAN 10.
+
+Đánh giá linux bridge:
+
+Ưu điểm: Cấu hình cực kỳ đơn giản, trực quan, dễ cô lập lỗi, hiệu năng cao và máy ảo không cần phải biết gì về cấu hình VLAN.
+
+Nhược điểm: Thiếu linh hoạt khi cần mở rộng. Nếu bạn muốn máy ảo VM_A thuộc VLAN 10, máy ảo VM_B thuộc VLAN 20, bạn bắt buộc phải có nhiều card mạng vật lý riêng biệt nối vào các cổng Access tương ứng trên Switch
+
+Thứ hai cấu hình linux-bridge bonding vlan 70 (switch vật lý cấu hình trunk allow vlan70/all)
 
 ```bash
 auto vmbr0
@@ -53,65 +59,35 @@ iface vmbr0 inet static
         bridge-fd 0
 ```
 
-Trong ví dụ này, `bond0.70` là sub-interface VLAN 70 của Bond `bond0`. Bridge nhận lưu lượng đã được gắn thẻ VLAN và gán IP quản trị của host.
+`bridge-ports`: interface nào được gắn vào bridge (ở đây là `bond0.70` — sub-interface VLAN 70 của bond0, xem phần VLAN bên dưới).
 
-### 1.3. Ưu và nhược điểm
+## 3.2. OVS Bridge
 
-**Ưu điểm Linux Bridge:**
-
-- Cấu hình đơn giản, trực quan.
-- Dễ cô lập và xử lý lỗi.
-- Hiệu năng cao.
-- VM không cần tự cấu hình VLAN trong mô hình Access.
-
-**Nhược điểm Linux Bridge:**
-
-- Tốn nhiều NIC hoặc bridge khi mở rộng nhiều VLAN.
-- VM thuộc VLAN khác nhau thường phải có cặp NIC/bridge tương ứng.
-
-## 2. OVS Bridge
-
-Ví dụ một OVS Bridge dùng Bond và nhiều VLAN:
+Cấu hình OVS Bridge bonding (trên SW vật lí cần cấu hình trunk allow vlanx/all theo nhu cầu)
 
 ```bash
 auto vmbr0
 iface vmbr0 inet manual
         ovs_type OVSBridge
-        ovs_ports bond0 vlan70 vlan71 vlan72
+        ovs_ports bond0 vlan70 vlan71 vlan72 ….
 ```
 
-`vmbr0` không gán IP trực tiếp ở ví dụ này. Địa chỉ quản trị đặt trên `OVSIntPort` riêng, ví dụ port VLAN 70.
+`vmbr0` ở đây không có IP trực tiếp (`inet manual`) — vì địa chỉ quản lý IP sẽ nằm ở một `OVSIntPort` riêng (`vlan70`), bridge chỉ đóng vai trò switch ảo.
 
-- `ovs_type OVSBridge`: khai báo đây là OVS Bridge.
-- `ovs_ports`: liệt kê Bond và các OVS VLAN Internal Port thuộc bridge.
-- `OVSIntPort`: port nội bộ mang IP của một mạng VLAN.
+`ovs_ports`: liệt kê tất cả port thuộc bridge này, gồm bond uplink và các VLAN internal port.
 
-### 2.1. Ưu điểm OVS
+Đánh giá về OVS
 
-- Một bridge có thể phục vụ nhiều VLAN.
-- Hỗ trợ cấu hình VLAN tag trực tiếp trên port VM hoặc Container.
-- Dễ mở rộng VLAN mà không cần thêm NIC vật lý cho từng VLAN.
-- Hỗ trợ Bonding và nhiều chế độ cân bằng tải.
-- Phù hợp cluster nhiều host, nhiều mạng logic như MGT, CLS và CEPH.
+Ưu điểm OVS:
 
-### 2.2. Nhược điểm OVS
+- Rất linh hoạt: 1 bridge duy nhất phục vụ được nhiều VLAN, không cần nhiều NIC vật lý cho mỗi VLAN như Linux Bridge.
+- VM có thể tự chọn VLAN qua tag ngay trên port ảo (OVSIntPort/OVSPort), dễ mở rộng thêm VLAN mới mà không cần đụng phần cứng.
+- Bonding tích hợp sẵn trong OVS, hỗ trợ nhiều thuật toán cân bằng tải (LACP, balance-slb...) linh hoạt hơn.
+- Phù hợp mô hình cluster nhiều host, nhiều mạng logic (MGT/CLS/CEPH...) chạy chung hạ tầng vật lý.
 
-- Cấu hình phức tạp hơn Linux Bridge.
-- VLAN tag và Bond mode sai có thể ảnh hưởng nhiều mạng cùng lúc.
-- Cần kiểm tra kỹ switch vật lý và cấu hình Trunk.
+Nhược điểm OVS:
 
-## 3. Hình minh họa từ tài liệu
-
-![Linux Bridge và OVS Bridge - trang 1](assets/img/proxmox-ceph/cau-hinh-linux-bridge-va-ovs-bridge/page-1.png)
-
-*Hình 1: Giới thiệu mô hình Linux Bridge và cấu hình mặc định.*
-
-![Linux Bridge và OVS Bridge - trang 2](assets/img/proxmox-ceph/cau-hinh-linux-bridge-va-ovs-bridge/page-2.png)
-
-*Hình 2: Cấu hình Linux Bridge/Bond VLAN và mô hình OVS Bridge.*
-
-![Linux Bridge và OVS Bridge - trang 3](assets/img/proxmox-ceph/cau-hinh-linux-bridge-va-ovs-bridge/page-3.png)
-
-*Hình 3: Ưu nhược điểm khi lựa chọn OVS Bridge.*
+- Cấu hình phức tạp hơn, người mới cần tìm hiểu kĩ
+- Cấu hình sai (đặc biệt VLAN tag, trunk) ảnh hưởng cả cụm vì nhiều VLAN dùng chung 1 bridge — rủi ro "một lỗi, ảnh hưởng nhiều mạng" cao hơn.
 
 > Nguồn: Cấu hình Bridge.pdf
