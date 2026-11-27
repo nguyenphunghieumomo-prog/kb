@@ -5,7 +5,7 @@ sub: tai-lieu-nguoi-moi
 type: Quy trình
 tags: proxmox, sdn, simple zone, dhcp, dnsmasq, nat, snat
 status: draft
-updated: 2026-11-26
+updated: 2026-11-27
 summary: Hướng dẫn tạo Simple Zone, VNet, subnet DHCP, SNAT và firewall rule cho VM/CT.
 source: Simple SDN.pdf
 review_note:
@@ -116,5 +116,63 @@ Ví dụ trong tài liệu kiểm thử:
 - VM 117 nhận IP `10.0.0.52`.
 - VM 118 nhận IP `10.0.0.51`.
 - Cả hai đều nhận DHCP thành công.
+
+## 8. Hình minh họa từ tài liệu
+
+![SDN Simple Zone - trang 1](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-01.png)
+
+*Hình 1: Giới thiệu SDN Simple Zone và mục tiêu NAT/DHCP.*
+
+![Cấu hình cài đặt và Simple Zone - trang 2](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-02.png)
+
+*Hình 2: Cài dnsmasq, tắt dịch vụ mặc định và tạo Zone.*
+
+![Thông tin Simple Zone - trang 3](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-03.png)
+
+*Hình 3: Các thông số ID, MTU, Nodes, IPAM và automatic DHCP.*
+
+![Ví dụ cấu hình Zone - trang 4](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-04.png)
+
+*Hình 4: Ví dụ giới hạn Simple Zone trên node PROX5 và PROX6.*
+
+![Tạo VNet - trang 5](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-05.png)
+
+*Hình 5: Cấu hình VNet và liên kết với Simple Zone.*
+
+![Tham số VNet - trang 6](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-06.png)
+
+*Hình 6: Name, Alias, Zone, Isolate Ports và VLAN Aware.*
+
+![Cấu hình VNet đơn giản - trang 7](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-07.png)
+
+*Hình 7: Ví dụ cấu hình VNet vnet0.*
+
+![Tạo Subnet - trang 8](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-08.png)
+
+*Hình 8: Tạo Subnet cho VNet và cấu hình dải mạng private.*
+
+![Cấu hình Subnet và SNAT - trang 9](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-09.png)
+
+*Hình 9: Subnet 10.0.0.0/24, Gateway 10.0.0.1 và SNAT.*
+
+![Cấu hình DHCP range - trang 10](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-10.png)
+
+*Hình 10: Phạm vi cấp phát DHCP từ 10.0.0.50 đến 10.0.0.200.*
+
+![Kích hoạt SDN và Firewall DHCP - trang 11](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-11.png)
+
+*Hình 11: Nhấn Apply và tạo rule cho phép DHCP.*
+
+![Cấu hình Firewall DHCP/DNS - trang 12](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-12.png)
+
+*Hình 12: Rule DHCPfwd, DNS và destination gateway.*
+
+![Kiểm tra DHCP trên VM - trang 13](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-13.png)
+
+*Hình 13: VM117 và VM118 nhận địa chỉ từ DHCP range.*
+
+![Kết quả DHCP VM117/VM118 - trang 14](assets/img/proxmox-ceph/sdn-simple-zone-nat-dhcp/page-14.png)
+
+*Hình 14: Địa chỉ VM117 là 10.0.0.52 và VM118 là 10.0.0.51.*
 
 > Nguồn: Simple SDN.pdf

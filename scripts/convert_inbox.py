@@ -14,6 +14,16 @@ for f in sorted(IN.rglob('*')):
         r = run(['pandoc', str(f), '-t', 'gfm', '--extract-media', str(d), '-o', str(d/'raw.md')]); ok = r.returncode == 0
     elif ext == '.pdf':
         r = run(['pdftotext', '-layout', str(f), str(d/'raw.md')]); ok = r.returncode == 0
+        if ok:
+            media = d/'media'; media.mkdir(exist_ok=True)
+            rpages = run(['pdftoppm', '-png', '-r', '120', str(f), str(media/'page')])
+            if rpages.returncode == 0:
+                with (d/'raw.md').open('a', encoding='utf-8') as out:
+                    out.write('\n\n## Hình minh họa từ tài liệu PDF\n')
+                    for page in sorted(media.glob('page-*.png')):
+                        out.write(f'![Trang {page.stem.split("-")[-1]}](media/{page.name})\n\n')
+            else:
+                print(f'Không thể trích xuất ảnh PDF: {f.name}')
     elif ext in ('.xlsx', '.xlsm'):
         import openpyxl
         wb = openpyxl.load_workbook(f, data_only=True); L = []

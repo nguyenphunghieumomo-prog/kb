@@ -5,7 +5,7 @@ sub: tai-lieu-nguoi-moi
 type: Quy trình
 tags: proxmox, network, nic, bonding, lacp, ovs
 status: draft
-updated: 2026-11-26
+updated: 2026-11-27
 summary: Cấu hình NIC, Linux Bonding và OVS Bonding cùng các mode và yêu cầu switch vật lý.
 source: Cấu hình Network Interface, Bonding.pdf
 review_note:
@@ -105,5 +105,27 @@ Có thể cấu hình thêm VLAN cho port OVS bằng `ovs_options tag=<VLAN_ID>`
 - OVS: linh hoạt khi quản lý VLAN, Trunk, Access và nhiều mạng logic.
 - Với `active-backup`, không bắt buộc Port-Channel/LACP trên switch.
 - Với `802.3ad`, `balance-xor` hoặc `balance-rr`, kiểm tra cấu hình Link Aggregation trên cả switch và host.
+
+## 7. Hình minh họa từ tài liệu
+
+![Network Interface và Linux Bonding - trang 1](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-1.png)
+
+*Hình 1: Cấu hình Interface và Bonding Linux.*
+
+![Các mode Linux Bonding - trang 2](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-2.png)
+
+*Hình 2: Các mode balance-rr, active-backup, balance-xor và broadcast.*
+
+![Các mode LACP và balance mode - trang 3](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-3.png)
+
+*Hình 3: Cấu hình 802.3ad, balance-tlb và balance-alb.*
+
+![OVS Bonding - trang 4](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-4.png)
+
+*Hình 4: Cấu hình OVSBond, ovs_bonds và bond_mode.*
+
+![OVS Bond mode - trang 5](assets/img/proxmox-ceph/cau-hinh-network-interface-bonding/page-5.png)
+
+*Hình 5: Các mode OVS và so sánh Linux Bridge/OVS.*
 
 > Nguồn: Cấu hình Network Interface, Bonding.pdf

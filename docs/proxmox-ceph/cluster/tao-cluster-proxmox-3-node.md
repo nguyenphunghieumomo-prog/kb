@@ -5,7 +5,7 @@ sub: cluster
 type: Quy trình
 tags: proxmox, cluster, quorum, join, vlan
 status: approved
-updated: 2026-11-25
+updated: 2026-11-27
 summary: Các bước tạo cluster 3 node PVE1/PVE2/PVE4, lấy Join Information và join node.
 source: 1_2_TẠO_CLUSTER.docx
 ---

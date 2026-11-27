@@ -5,7 +5,7 @@ sub: tai-lieu-nguoi-moi
 type: Quy trình
 tags: proxmox, linux bridge, ovs, vmbr0, networking
 status: draft
-updated: 2026-11-26
+updated: 2026-11-27
 summary: Cấu hình Linux Bridge và Open vSwitch Bridge, kèm ưu nhược điểm và mô hình VLAN/Trunk.
 source: Cấu hình Bridge.pdf
 review_note:
@@ -99,5 +99,19 @@ iface vmbr0 inet manual
 - Cấu hình phức tạp hơn Linux Bridge.
 - VLAN tag và Bond mode sai có thể ảnh hưởng nhiều mạng cùng lúc.
 - Cần kiểm tra kỹ switch vật lý và cấu hình Trunk.
+
+## 3. Hình minh họa từ tài liệu
+
+![Linux Bridge và OVS Bridge - trang 1](assets/img/proxmox-ceph/cau-hinh-linux-bridge-va-ovs-bridge/page-1.png)
+
+*Hình 1: Giới thiệu mô hình Linux Bridge và cấu hình mặc định.*
+
+![Linux Bridge và OVS Bridge - trang 2](assets/img/proxmox-ceph/cau-hinh-linux-bridge-va-ovs-bridge/page-2.png)
+
+*Hình 2: Cấu hình Linux Bridge/Bond VLAN và mô hình OVS Bridge.*
+
+![Linux Bridge và OVS Bridge - trang 3](assets/img/proxmox-ceph/cau-hinh-linux-bridge-va-ovs-bridge/page-3.png)
+
+*Hình 3: Ưu nhược điểm khi lựa chọn OVS Bridge.*
 
 > Nguồn: Cấu hình Bridge.pdf

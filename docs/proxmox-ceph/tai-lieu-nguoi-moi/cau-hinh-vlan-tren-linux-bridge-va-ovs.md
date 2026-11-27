@@ -5,7 +5,7 @@ sub: tai-lieu-nguoi-moi
 type: Quy trình
 tags: proxmox, vlan, linux bridge, ovs, trunk, bond
 status: draft
-updated: 2026-11-26
+updated: 2026-11-27
 summary: Cách cấu hình VLAN bằng sub-interface trên Linux Bridge và OVSIntPort trên Open vSwitch.
 source: Cấu hình VLAN.pdf
 review_note:
@@ -119,5 +119,23 @@ Trên switch vật lý, port nối với Bond phải được cấu hình Trunk 
 - Một host đơn lẻ thường chỉ cần hai VLAN: quản trị và dịch vụ.
 - Cluster lớn có nhiều VLAN MGT, CLS, CEPH và migration thì OVS giúp quy hoạch tập trung trên một bridge.
 - Linux Bridge dễ hiểu và phù hợp vài VLAN nhưng cấu hình sẽ dài và rối khi số VLAN tăng nhiều.
+
+## 6. Hình minh họa từ tài liệu
+
+![VLAN Linux Bridge - trang 1](assets/img/proxmox-ceph/cau-hinh-vlan-tren-linux-bridge-va-ovs/page-1.png)
+
+*Hình 1: Sub-interface VLAN trên Linux Bridge và cấu hình Bond VLAN.*
+
+![Trunk nhiều VLAN - trang 2](assets/img/proxmox-ceph/cau-hinh-vlan-tren-linux-bridge-va-ovs/page-2.png)
+
+*Hình 2: Cấu hình Trunk nhiều VLAN bằng Bond và nhiều bridge.*
+
+![VLAN trên OVS - trang 3](assets/img/proxmox-ceph/cau-hinh-vlan-tren-linux-bridge-va-ovs/page-3.png)
+
+*Hình 3: OVSIntPort, VLAN tag và mô hình mạng quản trị/dịch vụ.*
+
+![Cấu hình OVS Bridge tổng - trang 4](assets/img/proxmox-ceph/cau-hinh-vlan-tren-linux-bridge-va-ovs/page-4.png)
+
+*Hình 4: Cấu hình tổng bond0 và vmbr0 cho nhiều VLAN.*
 
 > Nguồn: Cấu hình VLAN.pdf

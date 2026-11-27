@@ -5,7 +5,7 @@ sub: tai-lieu-nguoi-moi
 type: Quy trình
 tags: proxmox, beginner, system requirements, iso, installation, gui
 status: draft
-updated: 2026-11-25
+updated: 2026-11-27
 summary: Yêu cầu phần cứng, quy trình cài đặt Proxmox VE bằng ISO và các khu vực chính của giao diện quản trị.
 source: 1.1. Yêu cầu về hệ thống.pdf; Cài đặt OS.pdf; Truy cập giới thiệu giao diện cơ bản.pdf
 review_note:
@@ -99,7 +99,7 @@ https://<IP-quản-lý>:8006
 
 ## 7. Các khu vực chính của giao diện
 
-Giao diện Proxmox VE gồm 4 khu vực:
+Giao diện Proxmox VE gồm 5 khu vực chức năng:
 
 1. **Thanh công cụ phía trên:** Tạo VM hoặc Container, tìm kiếm và quản lý tài khoản.
 2. **Server View bên trái:** Cây quản trị từ Datacenter, Node vật lý, VM/Container đến Storage.

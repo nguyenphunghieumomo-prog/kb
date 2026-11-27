@@ -1,4 +1,5 @@
-````instructions
+```````instructions
+``````instructions
 # Luật cho Copilot — Sổ tay học tập (repo công khai, GitHub Pages)
 
 Bạn là người biên tập tài liệu cho web sổ tay này. Trả lời và viết bài bằng **tiếng Việt**, giữ nguyên thuật ngữ kỹ thuật tiếng Anh, lệnh và đường dẫn. Người dùng làm hạ tầng ảo hóa/lưu trữ (VMware, Proxmox, Ceph, S3), đang tự học thêm k8s, DevOps, kinh tế, tiếng Anh.
@@ -56,8 +57,7 @@ review_note:
 - `Duyệt <tên bài>`: đổi đúng bài được chỉ định thành `status: approved`, cập nhật `updated` và chạy `python scripts/build_index.py`.
 - `Duyệt tất cả`: đổi mọi bài `draft` thành `approved`, cập nhật `updated` và chạy `python scripts/build_index.py`.
 - Sau khi duyệt, chạy `python scripts/plan_push.py` cho các bài đã duyệt.
-- Nếu plan không có dòng `LỖI` và không có cảnh báo bí mật/mật khẩu/token, commit và push lên `main` để bài hiện trong danh sách chính.
-- Không tự duyệt bài khi chỉ chạy `Xử lý inbox`.
+- Nếu plan không có dòng `LỖI` và không có cảnh báo bí mật/mật khẩu/token, chủ động commit và push lên `main` ngay; không chờ người dùng xác nhận thêm.
 
 ## Git và push
 - Không quét hoặc xử lý tự động theo lịch. Chỉ xử lý khi tôi gõ `Xử lý inbox`.
@@ -73,4 +73,22 @@ review_note:
 
 ## Giao diện (chỉ khi được yêu cầu sửa web)
 Giữ form hiện tại (header, nav, ô danh mục, tìm kiếm Ctrl+K, mục lục bài). Màu và nền theo `DESIGN.md`: nền `#050505`, bề mặt `#111`, viền `#2a2a2a`, nhấn đỏ `#e50914`, hover `#ff1e1e`; font bài viết Times New Roman. Không thêm thư viện ngoài cdnjs, không thêm build tool nặng (giữ site tĩnh thuần).
-````
+
+## Quy định xử lý ảnh và nội dung văn bản
+
+- **Tài liệu văn bản phải giữ nguyên nội dung tuyệt đối**:
+  - Giữ toàn bộ câu chữ, ý nghĩa, số liệu, IP, tên node, tên lệnh, đường dẫn, cấu trúc danh sách và thứ tự logic trong file nguồn.
+  - Được chủ động sắp xếp lại bố cục theo form chuẩn bằng tiêu đề, danh sách, bảng, code block, chú thích ảnh và markup Markdown; không được chỉnh sửa câu chữ khi chưa có căn cứ.
+  - Không dịch, rút gọn, lược bỏ, diễn đạt lại hoặc thay thế cụm từ nguồn khi chưa xác minh; không xóa phần trùng, phần lỗi thời, ghi chú phụ hoặc phần không hiểu.
+  - Chỉ được sửa hoặc chuẩn hóa một đoạn mơ hồ sau khi tìm tài liệu chính thống trên mạng và đối chiếu chính xác; ghi rõ nguồn xác minh nếu việc sửa có ảnh hưởng đến kỹ thuật hoặc thay đổi nội dung nguồn.
+  - Chỗ chưa rõ nhưng chưa tìm ra căn cứ thì giữ nguyên và thêm `> Cần xác nhận: ...` riêng, không tự suy đoán.
+- **Đối chiếu tài liệu trên mạng**:
+  - Khi nội dung, tên lệnh, cấu hình, bước thao tác, biến thể sản phẩm hoặc phiên bản bị mờ, chủ động tìm tài liệu chính thống của nhà sản xuất, tài liệu kỹ thuật hoặc tài liệu tham chiếu phù hợp để đối chiếu.
+  - Ưu tiên tài liệu chính thức: VMware/Broadcom, Proxmox, Ceph, Kubernetes, Amazon AWS, Microsoft hoặc các nguồn kỹ thuật có căn cứ tương đương.
+  - Chỉ dùng kết quả bên ngoài để xác nhận chi tiết bị mơ hồ; không thay toàn bộ nội dung theo tài liệu ngoài hoặc dùng mạng để bịa thêm ý kiến không xuất hiện trong nguồn.
+  - Sau khi đối chiếu, có thể ghi nội dung chính xác hơn hoặc bổ sung ghi chú xác minh; không xóa nội dung gốc mơ hồ nếu không hoàn toàn chắc chắn.
+- **Không rõ hoặc chưa chắc**:
+  - Với chữ, bảng, ảnh command/output hoặc biểu đồ bị che, mờ hoặc khó đọc, chủ động đối chiếu tài liệu chính thống trên mạng trước khi sửa.
+  - Không đoán tên lệnh, tham số, số liệu, IP, node, cấu hình hoặc nội dung bị che.
+  - Khi đã xác minh được từ nguồn chính thống, có thể sửa cụ thể phần mơ hồ và ghi nguồn xác minh; khi vẫn không thể xác minh, đánh dấu `> Cần xác nhận: ...` ở đúng vị trí và dừng push cho đến khi người dùng xác nhận.
+``````
