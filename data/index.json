@@ -177,7 +177,7 @@
     "certificate"
    ],
    "status": "draft",
-   "updated": "2026-11-25",
+   "updated": "2026-11-27",
    "summary": "Nhóm lệnh kiểm tra hệ thống, node, dịch vụ, chứng chỉ, thời gian, boot và nâng cấp Proxmox VE.",
    "review_note": "",
    "path": "docs/proxmox-ceph/cluster/lenh-he-thong-va-node-proxmox.md"
@@ -196,27 +196,26 @@
     "vlan"
    ],
    "status": "approved",
-   "updated": "2026-11-25",
+   "updated": "2026-11-27",
    "summary": "Các bước tạo cluster 3 node PVE1/PVE2/PVE4, lấy Join Information và join node.",
    "review_note": "",
    "path": "docs/proxmox-ceph/cluster/tao-cluster-proxmox-3-node.md"
   },
   {
    "id": "xoa-node-loi-khoi-cluster",
-   "title": "Xóa node lỗi khỏi cluster Proxmox",
+   "title": "1.3. Remove node lỗi khỏi cluster",
    "cat": "proxmox-ceph",
    "sub": "cluster",
    "type": "Sự cố",
    "tags": [
-    "proxmox",
+    "node lỗi",
     "cluster",
     "quorum",
-    "corosync",
     "pvecm"
    ],
    "status": "draft",
-   "updated": "2026-11-25",
-   "summary": "Cách kiểm tra quorum và xóa node đang lỗi khỏi cluster bằng pvecm delnode.",
+   "updated": "2026-11-27",
+   "summary": "Cách loại bỏ node lỗi khỏi cluster Proxmox khi quorum vẫn được duy trì.",
    "review_note": "",
    "path": "docs/proxmox-ceph/cluster/xoa-node-loi-khoi-cluster.md"
   },
@@ -234,7 +233,7 @@
     "networking"
    ],
    "status": "draft",
-   "updated": "2026-11-26",
+   "updated": "2026-11-27",
    "summary": "Cấu hình Linux Bridge và Open vSwitch Bridge, kèm ưu nhược điểm và mô hình VLAN/Trunk.",
    "review_note": "",
    "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/cau-hinh-linux-bridge-va-ovs-bridge.md"
@@ -254,7 +253,7 @@
     "ovs"
    ],
    "status": "draft",
-   "updated": "2026-11-26",
+   "updated": "2026-11-27",
    "summary": "Cấu hình NIC, Linux Bonding và OVS Bonding cùng các mode và yêu cầu switch vật lý.",
    "review_note": "",
    "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/cau-hinh-network-interface-bonding.md"
@@ -274,7 +273,7 @@
     "bond"
    ],
    "status": "draft",
-   "updated": "2026-11-26",
+   "updated": "2026-11-27",
    "summary": "Cách cấu hình VLAN bằng sub-interface trên Linux Bridge và OVSIntPort trên Open vSwitch.",
    "review_note": "",
    "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/cau-hinh-vlan-tren-linux-bridge-va-ovs.md"
@@ -294,7 +293,7 @@
     "gui"
    ],
    "status": "draft",
-   "updated": "2026-11-25",
+   "updated": "2026-11-27",
    "summary": "Yêu cầu phần cứng, quy trình cài đặt Proxmox VE bằng ISO và các khu vực chính của giao diện quản trị.",
    "review_note": "",
    "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/gioi-thieu-cai-dat-proxmox.md"
@@ -315,7 +314,7 @@
     "snat"
    ],
    "status": "draft",
-   "updated": "2026-11-26",
+   "updated": "2026-11-27",
    "summary": "Hướng dẫn tạo Simple Zone, VNet, subnet DHCP, SNAT và firewall rule cho VM/CT.",
    "review_note": "",
    "path": "docs/proxmox-ceph/tai-lieu-nguoi-moi/sdn-simple-zone-nat-dhcp.md"

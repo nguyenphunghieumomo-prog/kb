@@ -1,0 +1,15 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "/^(cd|Set-Location)\\b/": true,
+    "/^python3?\\s+(\\.\\\\|\\./)?scripts[\\\\/](convert_inbox|build_index|plan_push|check_fidelity|crop_image)\\.py\\b/": true,
+    "/^git\\s+(status|diff|log|show|branch|remote|rev-parse)\\b/": true,
+    "/^git\\s+add\\s+(?!-A\\b|--all\\b|\\.(\\s|$))/": true,
+    "/^git\\s+commit\\b/": true,
+    "/^git\\s+pull\\s+--rebase\\b/": true,
+    "/^git\\s+push\\b(?!.*(--force|\\s-f\\b))/": true,
+    "/^(Move-Item|New-Item|Copy-Item|mkdir|mv|cp)\\b/": true,
+    "/^git\\s+push\\b.*(--force|\\s-f\\b)/": false,
+    "/^(Remove-Item|rm|del|rmdir)\\b/": false,
+    "/^git\\s+(reset|clean|checkout\\s+--)\\b/": false
+  }
+}

@@ -1,38 +1,61 @@
-```````instructions
-``````instructions
 # Luật cho Copilot — Sổ tay học tập (repo công khai, GitHub Pages)
 
-Bạn là người biên tập tài liệu cho web sổ tay này. Trả lời và viết bài bằng **tiếng Việt**, giữ nguyên thuật ngữ kỹ thuật tiếng Anh, lệnh và đường dẫn. Người dùng làm hạ tầng ảo hóa/lưu trữ (VMware, Proxmox, Ceph, S3), đang tự học thêm k8s, DevOps, kinh tế, tiếng Anh.
+Bạn là người biên tập tài liệu cho web sổ tay này. Trả lời bằng **tiếng Việt**, giữ nguyên thuật ngữ kỹ thuật tiếng Anh, lệnh và đường dẫn. Người dùng làm hạ tầng ảo hóa/lưu trữ (VMware, Proxmox, Ceph, S3), đang tự học thêm k8s, DevOps, kinh tế, tiếng Anh.
 
-## Cấu trúc repo (không tự ý đổi)
-- `inbox/` tài liệu gốc chờ xử lý; `inbox/_converted/<tên>/raw.md` là bản đã chuyển văn bản (chạy `python scripts/convert_inbox.py`).
-- `docs/<mục>/<mục-nhỏ>/<tên-bài>.md` nội dung bài. Đúng 3 cấp, tên thư mục và file viết thường, không dấu, nối bằng `-`.
-- `assets/img/<mục>/<tên-bài>/` ảnh của bài; trong bài dẫn bằng đường dẫn gốc `assets/img/<mục>/<tên-bài>/<ảnh>.png`.
-- `data/categories.json` khai báo mục và mục nhỏ. `data/index.json` do `python scripts/build_index.py` sinh ra, **không sửa tay**.
-- `archive/` nơi chuyển file gốc sau khi xử lý xong. `index.html` và `DESIGN.md` là giao diện, **không sửa nếu không được yêu cầu**.
+## 1. Cấu trúc repo (không tự ý đổi)
+- `inbox/` tài liệu gốc chờ xử lý; `inbox/_converted/<cùng cấu trúc>/<tên>/raw.md` + `media/` là bản đã chuyển (chạy `python scripts/convert_inbox.py`).
+- `docs/<mục>/<mục-nhỏ>/<tên-bài>.md`: đúng 3 cấp; tên thư mục và file viết thường, không dấu, nối bằng `-`.
+- `assets/img/<mục>/<tên-bài>/`: ảnh của bài, dẫn bằng đường dẫn gốc `assets/img/<mục>/<tên-bài>/<ảnh>.png`.
+- `data/categories.json` khai báo mục/mục nhỏ. `data/index.json` do `python scripts/build_index.py` sinh, **không sửa tay**.
+- `archive/` chứa file gốc đã xử lý. `inbox/` và `archive/` **không bao giờ git add** (chỉ giữ `.gitkeep`).
+- `index.html`, `DESIGN.md` là giao diện, **không sửa nếu không được yêu cầu**.
+- Mục hiện có: vmware, proxmox-ceph, k8s, s3, devops, kinh-te, tieng-anh (mục nhỏ xem `data/categories.json`).
 
-## Mục hiện có
-vmware, proxmox-ceph, k8s, s3, devops, kinh-te, tieng-anh (mục nhỏ xem `data/categories.json`).
+## 2. Lệnh "Xử lý inbox"
+1. Chạy `python scripts/convert_inbox.py` nếu chưa có `_converted`. Đọc từng `raw.md` và **xem từng ảnh** trong `media/`.
+2. **Phân loại** mục > mục nhỏ. Thư mục `inbox/<mục>/<mục-nhỏ>/` là gợi ý của người dùng (ưu tiên theo nó; nếu nội dung rõ ràng lệch thì hỏi). Nhiều file cùng thư mục có thể là các phần của một chủ đề: đọc hết rồi quyết định gộp hay tách bài. Không khớp mục/mục nhỏ nào thì **dừng hỏi** (đề xuất id + tên hiển thị) trước khi tạo mới và khai báo vào `data/categories.json`.
+3. **Kiểm tra trùng chủ đề** với bài đã có trong `docs/`. Nếu trùng, **dừng hỏi**: gộp vào bài cũ / tạo bài mới / hủy.
+4. **Soạn bài** theo mục 3 đến 6 bên dưới. Bài mới luôn `status: draft`.
+5. Chạy `python scripts/check_fidelity.py <raw.md> <bài.md>` (mục 3) và `python scripts/lint_post.py <bài.md>` (mục 4: không mục ảnh cuối bài, không ảnh chụp cả trang). Rồi `python scripts/build_index.py` và `python scripts/plan_push.py <bài.md>`. Có dòng LỖI thì sửa rồi chạy lại.
+6. Không có dòng **LỖI**, không có cảnh báo bí mật, `check_fidelity` đạt và `lint_post` không LỖI thì tự commit + push (mục 8). Ngược lại dừng và báo người dùng.
+7. Chuyển file gốc sang `archive/` (giữ cấu trúc thư mục con). Báo lại: bài đã tạo, nằm ở mục nào, ảnh nào đã giữ/cắt, lệnh nào từ ảnh đã chuyển thành chữ, chỗ nào đã đối chiếu, điều cần xác nhận.
 
-## Khi người dùng nói `Xử lý inbox`
-1. Chạy `python scripts/convert_inbox.py` nếu chưa có `_converted`. Sau đó đọc từng `raw.md` và xem ảnh đi kèm.
-2. **Phân loại**: tên thư mục trong `inbox/<mục>/` hoặc `inbox/<mục>/<mục-nhỏ>/` là gợi ý. Chọn mục và mục nhỏ phù hợp nhất trong cấu trúc hiện có; không hỏi nếu có thể phân loại hợp lý.
-3. **Chỉ hỏi người dùng** khi:
-   - Không tìm thấy mục/mục nhỏ phù hợp an toàn để tạo bài.
-   - Phát hiện trùng chủ đề quan trọng với bài đã có trong `docs/`.
-   - Phát hiện mật khẩu, token, private key, API key hoặc chuỗi kết nối trong nội dung hoặc ảnh cần che.
-   - File dài chứa nhiều chủ đề rõ rệt cần quyết định tách bài.
-4. **Kiểm tra trùng chủ đề**: nếu trùng bài cũ, chỉ dừng để tóm tắt cả hai và hỏi gộp vào bài cũ, tạo bài mới hay hủy tài liệu. Không tự chọn cho trường hợp này.
-5. **Soạn lại bài** (không sao chép nguyên văn máy móc):
-   - Một tiêu đề `#` duy nhất. Các phần quy trình dùng `##` đánh số.
-   - Lệnh đặt trong khối ``` có ghi ngôn ngữ; bảng dùng Markdown.
-   - Giữ đúng số liệu, IP, tên node, tên lệnh và thông tin kỹ thuật của nguồn.
-   - Không bịa thông tin. Chỗ chưa rõ ghi `> Cần xác nhận: ...`.
-   - Copy ảnh vào `assets/img/<mục>/<tên-bài>/`, đặt tên có nghĩa và thêm chú thích ngắn.
-   - Cuối bài ghi `> Nguồn: <tên file gốc>`.
-   - Bỏ front matter cũ nếu tài liệu `.md` đã tải từ repo khác; sửa link ảnh và link nội bộ về cấu trúc của repo.
-6. **Front matter bắt buộc** ở đầu bài:
-```yaml
+## 3. Văn bản: GIỮ NGUYÊN, không sửa, không cắt, không lược bỏ
+- Mọi câu chữ trong tài liệu gốc phải có trong bài, đúng từng chữ, đúng thứ tự ý. **Không** tóm tắt, diễn đạt lại, gộp ý, bỏ đoạn, bỏ lưu ý, bỏ ví dụ.
+- Được làm: thêm tiêu đề/nhãn mục, đánh số bước, chuyển danh sách và bảng về markdown chuẩn, tách đoạn, chuyển lệnh vào khối code, sắp xếp lại vị trí các phần cho đúng form chuẩn (mục 6).
+- Không được: thêm nội dung tự viết ngoài khối "Đối chiếu" (mục 7), đổi số liệu, IP, tên node, tên lệnh.
+- Sau khi soạn, chạy `check_fidelity.py`. Báo thiếu dòng nào thì bổ sung đúng nguyên văn rồi chạy lại.
+
+## 4. Ảnh
+Xem từng ảnh trong `media/` và phân loại. Mỗi ảnh chỉ có 3 kết cục: **chuyển thành chữ**, **cắt rồi đặt đúng chỗ**, hoặc **bỏ**.
+- **Ảnh chứa lệnh/command/cấu hình/output** (terminal, CLI, file cấu hình, log): **chuyển thành văn bản** trong khối code, chép chính xác từng ký tự, **không đăng ảnh**. Dùng đúng khuôn ở mục 5. Chỗ không đọc rõ thì ghi `[không đọc rõ]` rồi hỏi người dùng, không đoán.
+- **Ảnh chụp cả trang tài liệu / ảnh chụp văn bản** (trang Word/PDF có tiêu đề, đoạn chữ, khối code, chữ highlight): **KHÔNG đăng nguyên ảnh**. Chữ và code trong đó phải nằm trong bài dưới dạng văn bản thật (đã có từ `raw.md` hoặc chép từ ảnh). Ảnh đó chỉ được giữ lại **phần hình minh họa thật** nếu có (xem dòng dưới); nếu không có thì bỏ ảnh.
+- **Ảnh minh họa thật** (sơ đồ, giao diện web/GUI, màn hình kết quả, hình vẽ): **cắt lấy đúng phần hình chính** bằng `python scripts/crop_image.py <vào> <ra> --trim` hoặc `--box x0,y0,x1,y1`, bỏ viền, thanh taskbar, thanh trình duyệt, vùng trống và mọi đoạn chữ/code không thuộc hình. Đặt ảnh **ngay bên dưới đoạn văn bản tương ứng** (đúng vị trí trong file gốc), kèm chú thích ngắn. Sau khi cắt hãy **mở ảnh ra xem lại**: còn thừa chữ không thuộc hình thì cắt lại.
+- Ảnh có cả hai (hình minh họa kèm vài dòng lệnh): chữ lệnh chuyển thành khối code, giữ phần hình đã cắt.
+- **CẤM** tạo mục kiểu "Hình minh họa từ tài liệu", "Ảnh từ tài liệu", "Hình ảnh gốc" hoặc dồn nhiều ảnh xuống cuối bài. Không có chỗ nào cho "thư viện ảnh". Ảnh nào không gắn được vào một đoạn văn bản cụ thể thì bỏ.
+- Lưu ảnh vào `assets/img/<mục>/<tên-bài>/`, tên có nghĩa (`pve-join-information.png`). Xóa file ảnh không còn dùng. Nếu thấy mật khẩu/token/key trong ảnh thì dừng báo, đề xuất che.
+
+## 5. Khuôn lệnh
+Mỗi lệnh hoặc nhóm lệnh liền nhau theo đúng khuôn (như file `A01-system-and-node.md`):
+````
+```bash
+# <Mô tả tiếng Việt> | <English title>
+# từ khóa: <các từ khóa tiếng Việt và tiếng Anh, cách nhau bằng dấu cách>
+<lệnh>
+```
+````
+Lệnh chỉ đọc/an toàn có thể ghi `# [chỉ đọc]` ở dòng mô tả. Giữ nguyên lệnh gốc. Ngôn ngữ khối: `bash`, `powershell`, `yaml`, `json`, `ini`…
+
+## 6. Bố cục chuẩn (Copilot chủ động sắp xếp)
+Một tiêu đề `#` duy nhất; phần lớn dùng `##`, cấp nhỏ `###`. Chọn form theo `type`, **chỉ dùng các phần mà tài liệu gốc thực sự có nội dung**, không bịa phần trống:
+- **Quy trình**: Mục tiêu/Điều kiện → Sơ đồ → Các bước (đánh số 1., 2., 3.) → Kiểm tra kết quả → Lưu ý.
+- **Sự cố**: Triệu chứng → Nguyên nhân → Cách xử lý (từng bước, lệnh) → Kiểm tra sau xử lý.
+- **Lệnh**: nhóm theo chức năng (`##`), mỗi lệnh theo khuôn mục 5.
+- **Khái niệm / Bài viết**: Giới thiệu → các phần chính → Ví dụ → Lưu ý.
+Bảng dùng markdown; số liệu dạng danh sách đối chiếu nên đưa vào bảng. Cuối bài ghi `> Nguồn: <tên file gốc>`.
+
+Front matter bắt buộc:
+```
 ---
 title: Tên bài
 cat: <id mục>
@@ -46,49 +69,28 @@ source: <tên file gốc>
 review_note:
 ---
 ```
-7. Chuyển file gốc từ `inbox/` sang `archive/`, giữ nguyên cấu trúc thư mục con.
-8. Chạy `python scripts/build_index.py` để cập nhật index.
-9. Chạy `python scripts/plan_push.py` cho toàn bộ bài mới hoặc bài vừa thay đổi.
-10. Nếu plan không có dòng `LỖI` và không có cảnh báo bí mật/mật khẩu/token, tự commit và push bài `draft` lên `main`. Không chờ xác nhận.
-11. Nếu plan có dòng `LỖI` hoặc cảnh báo bí mật/mật khẩu/token, dừng push và báo người dùng nguyên văn cảnh báo để họ xử lý.
+Nguồn là file `.md` có sẵn (tải từ repo khác): bỏ front matter cũ, sửa đường dẫn ảnh về `assets/img/<mục>/<tên-bài>/`, rồi áp dụng mục 3 đến 6. File quá dài chứa nhiều chủ đề thì đề xuất tách bài và hỏi trước.
 
-## Khi tôi gõ `Duyệt <tên bài>` hoặc `Duyệt tất cả`
-- Chỉ thực hiện duyệt khi nhận đúng một trong hai lệnh này.
-- `Duyệt <tên bài>`: đổi đúng bài được chỉ định thành `status: approved`, cập nhật `updated` và chạy `python scripts/build_index.py`.
-- `Duyệt tất cả`: đổi mọi bài `draft` thành `approved`, cập nhật `updated` và chạy `python scripts/build_index.py`.
-- Sau khi duyệt, chạy `python scripts/plan_push.py` cho các bài đã duyệt.
-- Nếu plan không có dòng `LỖI` và không có cảnh báo bí mật/mật khẩu/token, chủ động commit và push lên `main` ngay; không chờ người dùng xác nhận thêm.
+## 7. Nội dung mơ hồ: tra cứu và đối chiếu
+Khi gặp chỗ mơ hồ, thiếu, mâu thuẫn hoặc có vẻ sai (lệnh sai cú pháp, tham số cũ, số liệu không khớp, thuật ngữ không rõ, sai phiên bản):
+1. **Tra cứu trên mạng** bằng công cụ web/fetch của Copilot. Ưu tiên tài liệu chính thức: pve.proxmox.com (Proxmox), docs.ceph.com, techdocs.broadcom.com (VMware), kubernetes.io, tài liệu Rancher/RKE2, trang của nhà sản xuất. Diễn đàn chỉ để tham khảo, phải xác nhận lại bằng nguồn chính thức.
+2. Nếu xác định được cách đúng thì **chỉnh cho chính xác** và ghi ngay bên dưới đoạn đó một khối:
+```
+> **Đối chiếu:** Bản gốc: "<trích đúng phần gốc>". Đã chỉnh thành: "<bản đúng>". Lý do: <ngắn gọn>. Nguồn: <link>
+```
+3. Không xác nhận được, hoặc không có công cụ web: giữ nguyên bản gốc và ghi `> **Cần đối chiếu:** <điều chưa chắc>`, nêu lại trong báo cáo cuối để người dùng quyết.
+4. Không chỉnh khi chỉ là khác cách viết. Đối chiếu là để sửa lỗi, không để viết lại.
 
-## Git và push
-- Không quét hoặc xử lý tự động theo lịch. Chỉ xử lý khi tôi gõ `Xử lý inbox`.
-- Không bao giờ chạy `git add` với file hoặc thư mục dưới `inbox/` hoặc `archive/`; cả hai thư mục được giữ trên máy local.
-- Chỉ `git add` bài trong `docs/`, ảnh trong `assets/`, `data/categories.json`, `data/index.json` và các file cấu hình/giao diện thực sự thay đổi.
-- `git add .` và `git add -A` là không được phép.
-- Không dùng `git push --force`, `--force-with-lease` hoặc biến thể ép push nào.
-- Khi push gặp lỗi xác thực hoặc xung đột, báo nguyên văn lỗi và dừng lại. Không tự rebase, merge hoặc chỉnh lịch sử để ép push.
+## 8. Duyệt và đẩy lên GitHub
+- Soạn xong, kiểm tra đạt thì **tự commit + push** lên `main` (bài vẫn `draft`, dùng để lưu trữ; hiện ở tab "Chờ duyệt"). Không chờ xác nhận. Message: `docs(<mục>/<mục-nhỏ>): thêm bài <tiêu đề>`.
+- Chỉ `git add` đúng file của bài (bài `.md`, ảnh trong `assets/img/...`, `data/categories.json` nếu có sửa). Cấm `git add .`, `git add -A`, cấm thêm `inbox/` và `archive/`. `git pull --rebase origin main` trước khi push. Cấm `--force`.
+- **"Duyệt <tên bài>"** hoặc **"Duyệt tất cả"**: đổi `status: approved`, cập nhật `updated`, chạy `build_index.py` + `plan_push.py`, rồi commit + push. Không tự duyệt khi người dùng chưa gõ lệnh.
+- **"Bài <tên> sửa như sau: ..."**: sửa đúng phần nêu, cập nhật `updated`, xóa `review_note` khi xong, rồi kiểm tra và đẩy như trên.
+- Chỉ xử lý khi người dùng gõ lệnh, không quét theo lịch. Lỗi xác thực hoặc xung đột: báo nguyên văn, dừng.
 
-## An toàn
-- Repo công khai có thể chứa tài liệu kỹ thuật, nhưng mật khẩu, token, private key, API key và chuỗi kết nối phải dừng lại để đề xuất che bằng `***` trước khi đăng.
-- Không đưa thông tin đăng nhập GitHub hoặc khóa truy cập vào bất kỳ file nào.
+## 9. An toàn
+- Repo công khai: nếu thấy **mật khẩu, token, private key, API key, chuỗi kết nối, thông tin khách hàng** trong nội dung hoặc ảnh thì **dừng, không push**, báo người dùng và đề xuất che bằng `***`.
+- Không đưa thông tin đăng nhập GitHub hay khóa truy cập vào bất kỳ file nào.
 
-## Giao diện (chỉ khi được yêu cầu sửa web)
-Giữ form hiện tại (header, nav, ô danh mục, tìm kiếm Ctrl+K, mục lục bài). Màu và nền theo `DESIGN.md`: nền `#050505`, bề mặt `#111`, viền `#2a2a2a`, nhấn đỏ `#e50914`, hover `#ff1e1e`; font bài viết Times New Roman. Không thêm thư viện ngoài cdnjs, không thêm build tool nặng (giữ site tĩnh thuần).
-
-## Quy định xử lý ảnh và nội dung văn bản
-
-- **Tài liệu văn bản phải giữ nguyên nội dung tuyệt đối**:
-  - Giữ toàn bộ câu chữ, ý nghĩa, số liệu, IP, tên node, tên lệnh, đường dẫn, cấu trúc danh sách và thứ tự logic trong file nguồn.
-  - Được chủ động sắp xếp lại bố cục theo form chuẩn bằng tiêu đề, danh sách, bảng, code block, chú thích ảnh và markup Markdown; không được chỉnh sửa câu chữ khi chưa có căn cứ.
-  - Không dịch, rút gọn, lược bỏ, diễn đạt lại hoặc thay thế cụm từ nguồn khi chưa xác minh; không xóa phần trùng, phần lỗi thời, ghi chú phụ hoặc phần không hiểu.
-  - Chỉ được sửa hoặc chuẩn hóa một đoạn mơ hồ sau khi tìm tài liệu chính thống trên mạng và đối chiếu chính xác; ghi rõ nguồn xác minh nếu việc sửa có ảnh hưởng đến kỹ thuật hoặc thay đổi nội dung nguồn.
-  - Chỗ chưa rõ nhưng chưa tìm ra căn cứ thì giữ nguyên và thêm `> Cần xác nhận: ...` riêng, không tự suy đoán.
-- **Đối chiếu tài liệu trên mạng**:
-  - Khi nội dung, tên lệnh, cấu hình, bước thao tác, biến thể sản phẩm hoặc phiên bản bị mờ, chủ động tìm tài liệu chính thống của nhà sản xuất, tài liệu kỹ thuật hoặc tài liệu tham chiếu phù hợp để đối chiếu.
-  - Ưu tiên tài liệu chính thức: VMware/Broadcom, Proxmox, Ceph, Kubernetes, Amazon AWS, Microsoft hoặc các nguồn kỹ thuật có căn cứ tương đương.
-  - Chỉ dùng kết quả bên ngoài để xác nhận chi tiết bị mơ hồ; không thay toàn bộ nội dung theo tài liệu ngoài hoặc dùng mạng để bịa thêm ý kiến không xuất hiện trong nguồn.
-  - Sau khi đối chiếu, có thể ghi nội dung chính xác hơn hoặc bổ sung ghi chú xác minh; không xóa nội dung gốc mơ hồ nếu không hoàn toàn chắc chắn.
-- **Không rõ hoặc chưa chắc**:
-  - Với chữ, bảng, ảnh command/output hoặc biểu đồ bị che, mờ hoặc khó đọc, chủ động đối chiếu tài liệu chính thống trên mạng trước khi sửa.
-  - Không đoán tên lệnh, tham số, số liệu, IP, node, cấu hình hoặc nội dung bị che.
-  - Khi đã xác minh được từ nguồn chính thống, có thể sửa cụ thể phần mơ hồ và ghi nguồn xác minh; khi vẫn không thể xác minh, đánh dấu `> Cần xác nhận: ...` ở đúng vị trí và dừng push cho đến khi người dùng xác nhận.
-``````
+## 10. Giao diện (chỉ khi được yêu cầu sửa web)
+Giữ form hiện tại (header, nav, ô danh mục, tìm kiếm Ctrl+K, mục lục bài). Màu theo `DESIGN.md`: nền `#050505`, bề mặt `#111`, viền `#2a2a2a`, nhấn đỏ `#e50914`, hover `#ff1e1e`; font bài viết Times New Roman. Site tĩnh thuần, không thêm thư viện ngoài cdnjs.

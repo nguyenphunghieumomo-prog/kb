@@ -13,7 +13,7 @@ Luật đầy đủ nằm trong `.github/copilot-instructions.md`: Copilot tự 
 ```
 Đọc kỹ .github/copilot-instructions.md rồi làm đúng từng mục, đặc biệt:
 - Mục 3: văn bản gốc giữ nguyên, không sửa, không cắt, không lược bỏ; chạy scripts/check_fidelity.py.
-- Mục 4: ảnh lệnh/cấu hình chuyển thành code; ảnh minh họa cắt phần liên quan bằng scripts/crop_image.py và đặt đúng chỗ.
+- Mục 4: ảnh lệnh/cấu hình chuyển thành code; ảnh chụp cả trang thì không đăng; ảnh minh họa thật cắt phần chính bằng scripts/crop_image.py và đặt ngay dưới đoạn văn tương ứng; cấm mục "Hình minh họa từ tài liệu" ở cuối bài.
 - Mục 6: tự sắp xếp bố cục theo form chuẩn.
 - Mục 7: nội dung mơ hồ thì tra tài liệu chính thức trên mạng, chỉnh cho chính xác và ghi khối "Đối chiếu".
 Bây giờ thực hiện: Xử lý inbox.
